@@ -28,9 +28,7 @@ Thumbs.db
 # ---------------------------
 # Data (derived / large)
 # ---------------------------
-data/processed/
-data/raw/*.parquet
-data/raw/*.csv
+data/
 
 # ---------------------------
 # Vector indexes & cache
