@@ -60,3 +60,11 @@ MAX_OUTPUT_TOKENS = 600
 ENABLE_CACHE = True
 CACHE_VER = "v1"
 LOG_LEVEL = "INFO"
+
+METADATA_COLS = {
+    "chunk_id_col":"chunk_id",
+    "business_id_col":"business_id",
+    "restaurant_name_col":"restaurant_name",
+    "review_id_col":"review_id",
+    "chunk_col":"chunk"
+}
