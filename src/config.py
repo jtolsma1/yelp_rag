@@ -53,7 +53,7 @@ TOPIC_ORDER = {"food","service","ambiance"}
 # local LLM
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_BASE_URL = "http://localhost:11434"
-TEMPERATURE = 0.2
+TEMPERATURE = 0.5
 MAX_OUTPUT_TOKENS = 600
 
 # caching & logging
@@ -65,6 +65,7 @@ METADATA_COLS = {
     "chunk_id_col":"chunk_id",
     "business_id_col":"business_id",
     "restaurant_name_col":"restaurant_name",
+    "stars_col":"stars",
     "review_id_col":"review_id",
     "chunk_col":"chunk"
 }
