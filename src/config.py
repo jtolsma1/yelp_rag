@@ -9,12 +9,18 @@ DATA_DIR_PROC = os.path.join(PROJECT_DIR,"data","processed")
 INDEX_DIR = PROJECT_DIR / "indexes"
 CACHE_DIR = PROJECT_DIR / "cache"
 
+# dataset import and setup
+N_IMPORT_ROWS = 500000
+MIN_REVIEWS = 100
+N_RESTAURANTS = 10
+
 # column definitions
+COL_BUSINESS_CATEGORY = "categories"
 COL_RESTAURANT_ID = "business_id"
 COL_RESTAURANT_NAME = "name"
-COL_REVIEW_ID = ""
+COL_REVIEW_ID = "review_id"
 COL_DATE = ""
-COL_STARS = ""
+COL_STARS = "stars_review"
 COL_TEXT = "text"
 
 # cleaning & chunking params
@@ -53,7 +59,7 @@ TOPIC_ORDER = {"food","service","ambiance"}
 # local LLM
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_BASE_URL = "http://localhost:11434"
-TEMPERATURE = 0.5
+TEMPERATURE = 0.4
 MAX_OUTPUT_TOKENS = 600
 
 # caching & logging
