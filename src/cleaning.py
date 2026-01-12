@@ -8,16 +8,26 @@ class CleanChunkYelpReviews:
 
 
     def __init__(self,sampled_data_path,processed_data_path):
+        """
+        @param sampled_data_path: import file path supplying data for restaurants selected for the RAG
+        @param processed_data_path: export file path for storing cleaned and chunked reviews data
+        """
         self.sampled_data_path = sampled_data_path
         self.processed_data_path = processed_data_path
 
 
     def load_rag_reviews_data(self):
+        """
+        Load the data saved from the import step
+        """
         return pd.read_csv(self.sampled_data_path)
 
     @staticmethod
     def clean_review_text(df):
-        "for dataframe df, remove nonstandard characters and drop unusable (too short) values"
+        """
+        Removes nonstandard characters and drop unusable (too short) values
+        @param df: dataframe containing reviews data to be cleaned
+        """
 
         COL_TEXT = config.COL_TEXT
         before = len(df)
@@ -48,12 +58,16 @@ class CleanChunkYelpReviews:
 
     @staticmethod
     def normalize_unicode(text):
-        "convert all characters to standard unicode"
+        """
+        Convert all characters in the review text to standard unicode.
+        """
         return unicodedata.normalize("NFKC",text)
 
     @staticmethod
     def deduplicate_reviews(df):
-        "remove duplicated review texts from the dataset"
+        """
+        Remove duplicate reviews from the dataset.
+        """
         before = len(df)
         df = df.drop_duplicates(subset = [config.COL_TEXT])
         print(f"{before - len(df)} reviews dropped in deduplicating step.")
@@ -61,6 +75,10 @@ class CleanChunkYelpReviews:
 
 
     def clean_normalize_deduplicate(self,df):
+        """
+        Apply cleaning, unicode normalization, and deduplication steps:
+        @param df: dataframe containing reviews data to be cleaned
+        """
         df = self.clean_review_text(df)
         df[config.COL_TEXT] = df[config.COL_TEXT].apply(self.normalize_unicode)
         df = self.deduplicate_reviews(df)
@@ -69,6 +87,11 @@ class CleanChunkYelpReviews:
 
     @staticmethod
     def divide_reviews_into_chunks(text):
+        """
+        For a given piece of text, divide into chunks with a maximum chunk size set in config.py.
+        Chunking avoids overwhelming the LLM with text strings that are too long.
+        @param text: text string to be divided into chunks.
+        """
         chunk_dict = {}
         char_idx = 0
         chunk_idx = 0
@@ -92,6 +115,11 @@ class CleanChunkYelpReviews:
             return pd.DataFrame(chunk_dict,index = ["chunk"]).T.reset_index(names = ["chunk_index"])
         
     def generate_chunk_df(self,df):
+        """
+        Transform the reviews dataframe (with one review per row of any length) into chunks.
+        Associate the important review metadata with each chunk.
+        @param df: dataframe to be transformed into chunks.
+        """
         chunk_df = pd.DataFrame()
         for row in df.itertuples():
             new_row = self.divide_reviews_into_chunks(row.text)
@@ -108,7 +136,17 @@ class CleanChunkYelpReviews:
     
 
     def clean_chunk_export(self):
+        """
+        Execute all cleaning and chunking functions. 
+        Store the chunked data as a parquet file in the 'processed' data directory.
+        """
         reviews_df = self.load_rag_reviews_data()
+
+        print("Executing clean/unicode normalization/deduplication step.")
         cleaned_reviews = self.clean_normalize_deduplicate(reviews_df)
+
+        print(f"Splitting reviews into chunks of maximum {config.CHUNK_CHARS} characters")
         cleaned_chunked = self.generate_chunk_df(cleaned_reviews)
+
+        print(f"Storing chunked data as parquet at {self.processed_data_path}")
         cleaned_chunked.to_parquet(self.processed_data_path,engine = "pyarrow")
