@@ -19,8 +19,8 @@ COL_BUSINESS_CATEGORY = "categories"
 COL_RESTAURANT_ID = "business_id"
 COL_RESTAURANT_NAME = "name"
 COL_REVIEW_ID = "review_id"
-COL_DATE = ""
-COL_STARS = "stars_review"
+COL_DATE = "date"
+COL_STARS = "stars_reviews"
 COL_TEXT = "text"
 
 # cleaning & chunking params

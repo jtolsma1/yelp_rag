@@ -123,13 +123,13 @@ class CleanChunkYelpReviews:
         chunk_df = pd.DataFrame()
         for row in df.itertuples():
             new_row = self.divide_reviews_into_chunks(row.text)
-            new_row["business_id"] = row.business_id
-            new_row["review_id"] = row.review_id
-            new_row["restaurant_name"] = row.name
-            new_row["chunk_id"] = f"{row.review_id}_{new_row["chunk_index"].values[0]}"
+            new_row["business_id"] = getattr(row,config.COL_RESTAURANT_ID)
+            new_row["review_id"] = getattr(row,config.COL_REVIEW_ID)
+            new_row["restaurant_name"] = getattr(row,config.COL_RESTAURANT_NAME)
+            new_row["chunk_id"] = f"{get_attr(row,config.COL_REVIEW_ID)_{new_row["chunk_index"].values[0]}"
             new_row["n_chars"] = new_row["chunk"].str.len()
-            new_row["stars"] = row.stars_reviews
-            new_row["date"] = row.date
+            new_row["stars"] = getattr(row,config.COL_STARS)
+            new_row["date"] = getattr(row,config.COL_DATE)
             chunk_df = pd.concat([chunk_df,new_row],axis = 0)
             chunk_df = chunk_df.reset_index(drop = True)
         return chunk_df
