@@ -13,8 +13,10 @@ class ImportYelpReviewText:
                  sampled_data_path_reviews,
                  sampled_data_path_rag):
         """
-        @param raw_data_path: file path for sourcing the entire Yelp dataset in two parts, (1) review content and (2) business identifier information
-        @param sampled_data_path: place to store data sampled from the Yelp dataset (which is too large to use in its entirety)
+        @param raw_data_path_reviews: file path for sourcing the review content from the entire Yelp dataset
+        @param raw_data_path_business: file path for sourcing the business identifiers from the entire Yelp dataset 
+        @param sampled_data_path_reviews: file path for storing data sampled from the Yelp dataset
+        @param sampled_data_path_rag: fole path for storing data for restaurants selected for the RAG
         """
         self.raw_data_path_reviews = raw_data_path_reviews
         self.raw_data_path_business = raw_data_path_business
