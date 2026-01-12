@@ -7,14 +7,19 @@ import json
 import src.config as config
 class ImportYelpReviewText:
 
-    def __init__(self,raw_data_path,sampled_data_path):
+    def __init__(self,
+                 raw_data_path_reviews,
+                 raw_data_path_business,
+                 sampled_data_path_reviews,
+                 sampled_data_path_rag):
         """
         @param raw_data_path: file path for sourcing the entire Yelp dataset in two parts, (1) review content and (2) business identifier information
         @param sampled_data_path: place to store data sampled from the Yelp dataset (which is too large to use in its entirety)
         """
-        self.reviews_path = os.path.join(raw_data_path,"yelp_academic_dataset_review.json")
-        self.business_path = os.path.join(raw_data_path,"yelp_academic_dataset_business.json")
-        self.sampled_data_path = sampled_data_path
+        self.raw_data_path_reviews = raw_data_path_reviews
+        self.raw_data_path_business = raw_data_path_business
+        self.sampled_data_path_reviews = sampled_data_path_reviews
+        self.sampled_data_path_rag = sampled_data_path_rag
 
 
     @staticmethod
@@ -39,8 +44,8 @@ class ImportYelpReviewText:
         Execute data extraction from the Yelp review content and business content (stored separately).
         Merge the two extractions together into a single dataset.
         """
-        reviews = self.import_sample_from_complete_dataset(self.reviews_path)
-        businesses = self.import_sample_from_complete_dataset(self.business_path)
+        reviews = self.import_sample_from_complete_dataset(self.raw_data_path_reviews)
+        businesses = self.import_sample_from_complete_dataset(self.raw_data_path_business)
         
         reviews_sample = pd.merge(
             pd.DataFrame(reviews),
@@ -50,7 +55,7 @@ class ImportYelpReviewText:
             suffixes = ["_reviews","_restaurant"]
         ).dropna()
 
-        reviews_sample.to_csv(os.path.join(self.sampled_data_path,"reviews_sample.csv"))
+        reviews_sample.to_csv(self.sampled_data_path_reviews)
         return reviews_sample
     
     def select_restaurants_for_rag(self,input_df):
@@ -73,7 +78,7 @@ class ImportYelpReviewText:
 
         output_df = input_df[input_df[config.COL_RESTAURANT_ID].isin(selected_ids)]
 
-        output_df.to_csv(os.path.join(self.sampled_data_path,"reviews_df.csv"))
+        output_df.to_csv(self.sampled_data_path_rag)
         return output_df
     
 
@@ -87,10 +92,11 @@ class ImportYelpReviewText:
         reviews_sample = self.import_yelp_data_sample()
         
         print(f"Yelp dataset sample with shape {reviews_sample.shape} created.")
-        print(f"Yelp dataset sample stored as 'reviews_sample.csv' at {self.sampled_data_path}")
+        print(f"Yelp dataset sample stored at {self.sampled_data_path_reviews}")
         print(f"Sampling Yelp dataset for {config.N_RESTAURANTS} restaurants to use in this RAG demo.")
+        print("")
         
         reviews_df = self.select_restaurants_for_rag(reviews_sample)
         
         print(f"RAG dataset consisting of {config.N_RESTAURANTS} and with shape {reviews_df.shape} created.")
-        print(f"RAG dataset sample stored as 'reviews_df.csv' at {self.sampled_data_path}")
+        print(f"RAG dataset sample stored at {self.sampled_data_path_rag}")
