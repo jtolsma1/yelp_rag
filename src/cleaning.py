@@ -19,6 +19,7 @@ class CleanChunkYelpReviews:
     def load_rag_reviews_data(self):
         """
         Load the data saved from the import step
+        @returns: imported dataframe 
         """
         return pd.read_csv(self.sampled_data_path)
 
@@ -27,6 +28,7 @@ class CleanChunkYelpReviews:
         """
         Removes nonstandard characters and drop unusable (too short) values
         @param df: dataframe containing reviews data to be cleaned
+        @returns: dataframe with nonstandard and non-useful text removed.
         """
 
         COL_TEXT = config.COL_TEXT
@@ -60,6 +62,7 @@ class CleanChunkYelpReviews:
     def normalize_unicode(text):
         """
         Convert all characters in the review text to standard unicode.
+        @returns: reviews data normalized to include only unicode text.
         """
         return unicodedata.normalize("NFKC",text)
 
@@ -67,6 +70,7 @@ class CleanChunkYelpReviews:
     def deduplicate_reviews(df):
         """
         Remove duplicate reviews from the dataset.
+        @returns: deduplicated review dataframe
         """
         before = len(df)
         df = df.drop_duplicates(subset = [config.COL_TEXT])
@@ -78,6 +82,7 @@ class CleanChunkYelpReviews:
         """
         Apply cleaning, unicode normalization, and deduplication steps:
         @param df: dataframe containing reviews data to be cleaned
+        @returns: cleaned, normalized, deduplicated dataframe of reviews
         """
         df = self.clean_review_text(df)
         df[config.COL_TEXT] = df[config.COL_TEXT].apply(self.normalize_unicode)
@@ -91,6 +96,7 @@ class CleanChunkYelpReviews:
         For a given piece of text, divide into chunks with a maximum chunk size set in config.py.
         Chunking avoids overwhelming the LLM with text strings that are too long.
         @param text: text string to be divided into chunks.
+        @return: review texts divided into chunks of size specified in config file
         """
         chunk_dict = {}
         char_idx = 0
@@ -119,6 +125,7 @@ class CleanChunkYelpReviews:
         Transform the reviews dataframe (with one review per row of any length) into chunks.
         Associate the important review metadata with each chunk.
         @param df: dataframe to be transformed into chunks.
+        @return: chunked review data plus relevant metadata
         """
         chunk_df = pd.DataFrame()
         for row in df.itertuples():
@@ -126,7 +133,7 @@ class CleanChunkYelpReviews:
             new_row["business_id"] = getattr(row,config.COL_RESTAURANT_ID)
             new_row["review_id"] = getattr(row,config.COL_REVIEW_ID)
             new_row["restaurant_name"] = getattr(row,config.COL_RESTAURANT_NAME)
-            new_row["chunk_id"] = f"{get_attr(row,config.COL_REVIEW_ID)_{new_row["chunk_index"].values[0]}"
+            new_row["chunk_id"] = f"{getattr(row,config.COL_REVIEW_ID)}_{new_row["chunk_index"].values[0]}"
             new_row["n_chars"] = new_row["chunk"].str.len()
             new_row["stars"] = getattr(row,config.COL_STARS)
             new_row["date"] = getattr(row,config.COL_DATE)
