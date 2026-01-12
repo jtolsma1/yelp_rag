@@ -5,11 +5,12 @@ import numpy as np
 import json
 
 import src.config as config
-
 class ImportYelpReviewText:
 
     def __init__(self,raw_data_path,sampled_data_path):
         """
+        @param raw_data_path: file path for sourcing the entire Yelp dataset in two parts, (1) review content and (2) business identifier information
+        @param sampled_data_path: place to store data sampled from the Yelp dataset (which is too large to use in its entirety)
         """
         self.reviews_path = os.path.join(raw_data_path,"yelp_academic_dataset_review.json")
         self.business_path = os.path.join(raw_data_path,"yelp_academic_dataset_business.json")
@@ -19,6 +20,9 @@ class ImportYelpReviewText:
     @staticmethod
     def import_sample_from_complete_dataset(import_path):
         """
+        Extract a preset slice of data from the Yelp dataset for use in the RAG.
+        The scale of the slice is set in config.py.
+        @param import_path: file path for the entire Yelp dataset
         """
 
         sample =[]
@@ -32,6 +36,8 @@ class ImportYelpReviewText:
 
     def import_yelp_data_sample(self):
         """
+        Execute data extraction from the Yelp review content and business content (stored separately).
+        Merge the two extractions together into a single dataset.
         """
         reviews = self.import_sample_from_complete_dataset(self.reviews_path)
         businesses = self.import_sample_from_complete_dataset(self.business_path)
@@ -49,6 +55,9 @@ class ImportYelpReviewText:
     
     def select_restaurants_for_rag(self,input_df):
         """
+        Filter the extracted Yelp data to restaurants only with a minimum number of distinct reviews.
+        Then reduce that list to a preset number of restaurants; that preset number is set in config.py.
+        @param input_df: extracted Yelp dataset
         """
 
         cond1 = input_df[config.COL_BUSINESS_CATEGORY].str.lower().str.contains("restaurant")
@@ -70,6 +79,8 @@ class ImportYelpReviewText:
 
     def generate_final_restaurant_list_for_rag(self):
         """
+        Execute the Yelp dataset extraction process end-to-end, starting with the entire Yelp dataset and ending with 
+        a small quantity of restaurants with a minimum number of reviews to use in the RAG.
         """
         print("Sampling Yelp datasets...")
         
