@@ -21,7 +21,7 @@ class CreateReviewEmbeddings:
     def load_chunked_reviews_data(self):
         """
         Import the cleaned and chunked reviews.
-        @returns:
+        @return: reviews data passed through cleaning and chunking steps.
         """
         return pd.read_parquet(self.processed_data_path)
     
@@ -29,7 +29,7 @@ class CreateReviewEmbeddings:
     def load_embedding_model(model_name,device = "mps"):
         """
         Load a local embedding model using sentence_transformer library.
-        @returns: sen
+        @return: transformer model from HuggingFace.
         """
         return SentenceTransformer(model_name_or_path = model_name, device = device)
     
@@ -48,7 +48,7 @@ class CreateReviewEmbeddings:
         @param normalize_embeddings: whether to return vectors that have a length of 1; standard parameter in the .encode function in SentenceTransformer class
         @param show_progress_bar: shows embedding progress; standard parameter in the .encode function in SentenceTransformer class
         @param convert_to_numpy: whether to return vectors as a numpy array; standard parameter in the .encode function in SentenceTransformer class
-        @returns: 
+        @return: embeddings of review text chunks created using the selected transformer model. 
         """
     
         embeddings = model.encode(
@@ -64,6 +64,12 @@ class CreateReviewEmbeddings:
 
     @staticmethod
     def build_faiss_index(X,metric = "cosine"):
+        """
+        Creates FAISS indicies from review chunk embeddings.
+        @param X: embeddings created using the 'embed_texts' function
+        @param metric: search metric; must be cosine or l2
+        @return: FAISS index data
+        """
 
         assert X.dtype == np.float32
         n,d = X.shape
@@ -81,6 +87,11 @@ class CreateReviewEmbeddings:
 
 
     def create_faiss_for_yelp_reviews(self):
+        """
+        Converts cleaned and chunked reviews data (text) into embeddings, then converts those embeddings into FAISS index files.
+        Also creates metadatafiles to pair with each FAISS index to source restaurant name, review stars, etc. for retrieved indicies.
+        Generates one index file per restaurant.
+        """
 
         chunks_df = self.load_chunked_reviews_data()
         texts = chunks_df["chunk"].tolist()
