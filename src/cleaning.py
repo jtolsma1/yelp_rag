@@ -19,7 +19,7 @@ class CleanChunkYelpReviews:
     def load_rag_reviews_data(self):
         """
         Load the data saved from the import step
-        @returns: imported dataframe 
+        @return: imported dataframe 
         """
         return pd.read_csv(self.sampled_data_path)
 
@@ -28,7 +28,7 @@ class CleanChunkYelpReviews:
         """
         Removes nonstandard characters and drop unusable (too short) values
         @param df: dataframe containing reviews data to be cleaned
-        @returns: dataframe with nonstandard and non-useful text removed.
+        @return: dataframe with nonstandard and non-useful text removed.
         """
 
         COL_TEXT = config.COL_TEXT
@@ -62,7 +62,7 @@ class CleanChunkYelpReviews:
     def normalize_unicode(text):
         """
         Convert all characters in the review text to standard unicode.
-        @returns: reviews data normalized to include only unicode text.
+        @return: reviews data normalized to include only unicode text.
         """
         return unicodedata.normalize("NFKC",text)
 

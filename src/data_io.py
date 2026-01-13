@@ -30,7 +30,7 @@ class ImportYelpReviewText:
         Extract a preset slice of data from the Yelp dataset for use in the RAG.
         The scale of the slice is set in config.py.
         @param import_path: file path for the entire Yelp dataset
-        @returns: sample consisting of a number of rows specified in a config file
+        @return: sample consisting of a number of rows specified in a config file
         """
 
         sample =[]
@@ -46,7 +46,7 @@ class ImportYelpReviewText:
         """
         Execute data extraction from the Yelp review content and business content (stored separately).
         Merge the two extractions together into a single dataset.
-        @returns: combined Yelp dataset of review content and business identifiers
+        @return: combined Yelp dataset of review content and business identifiers
         """
         reviews = self.import_sample_from_complete_dataset(self.raw_data_path_reviews)
         businesses = self.import_sample_from_complete_dataset(self.raw_data_path_business)
@@ -67,7 +67,7 @@ class ImportYelpReviewText:
         Filter the extracted Yelp data to restaurants only with a minimum number of distinct reviews.
         Then reduce that list to a preset number of restaurants; that preset number is set in config.py.
         @param input_df: extracted Yelp dataset
-        @returns: Yelp data samples filtered for (1) restaurants only and (2) having a minimum number of reviews
+        @return: Yelp data samples filtered for (1) restaurants only and (2) having a minimum number of reviews
         """
 
         cond1 = input_df[config.COL_BUSINESS_CATEGORY].str.lower().str.contains("restaurant")
