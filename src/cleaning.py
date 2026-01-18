@@ -146,6 +146,7 @@ class CleanChunkYelpReviews:
         """
         Execute all cleaning and chunking functions. 
         Store the chunked data as a parquet file in the 'processed' data directory.
+        @return: True if executed successfully
         """
         reviews_df = self.load_rag_reviews_data()
 
@@ -157,3 +158,5 @@ class CleanChunkYelpReviews:
 
         print(f"Storing chunked data as parquet at {self.processed_data_path}")
         cleaned_chunked.to_parquet(self.processed_data_path,engine = "pyarrow")
+
+        return True

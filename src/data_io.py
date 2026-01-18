@@ -91,6 +91,7 @@ class ImportYelpReviewText:
         """
         Execute the Yelp dataset extraction process end-to-end, starting with the entire Yelp dataset and ending with 
         a small quantity of restaurants with a minimum number of reviews to use in the RAG.
+        @return: True if executed successfully
         """
         print("Sampling Yelp datasets...")
         
@@ -105,3 +106,4 @@ class ImportYelpReviewText:
         
         print(f"RAG dataset consisting of {config.N_RESTAURANTS} and with shape {reviews_df.shape} created.")
         print(f"RAG dataset sample stored at {self.sampled_data_path_rag}")
+        return True

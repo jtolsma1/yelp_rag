@@ -91,12 +91,13 @@ class CreateReviewEmbeddings:
         Converts cleaned and chunked reviews data (text) into embeddings, then converts those embeddings into FAISS index files.
         Also creates metadatafiles to pair with each FAISS index to source restaurant name, review stars, etc. for retrieved indicies.
         Generates one index file per restaurant.
+        @return: True if executed successfully
         """
 
         chunks_df = self.load_chunked_reviews_data()
         texts = chunks_df["chunk"].tolist()
         
-        model = self.load_embedding_model(config.EMBEDDING_MODEL_NAME,"mps")
+        model = self.load_embedding_model(config.EMBEDDING_MODEL_NAME,config.EMBED_DEVICE)
         print(f"Loaded model '{config.EMBEDDING_MODEL_NAME}' from HuggingFace.")
         print("Starting embedding process:")
         embeddings = self.embed_texts(model,texts,batch_size = config.EMBED_BATCH_SIZE,normalize_flag = True)
@@ -117,3 +118,5 @@ class CreateReviewEmbeddings:
 
         meta_created = list(config.INDEX_DIR.glob("*.parquet"))  
         print(f"{len(meta_created)} metadata files (.parquet) created in the index directory.")  
+
+        return True
