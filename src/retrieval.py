@@ -138,6 +138,6 @@ class RetrieveRelevantText:
                 print(f"business id = {k}, topic = {v}")
         else:
             print("No empty results found.")
-        result_df.to_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"))
+        result_df.to_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"),engine = "pyarrow")
         print(f"Relevant text dataframe uploaded to {os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet")}")
         return True
