@@ -9,13 +9,45 @@ import src.config as config
 
 class CreateReviewEmbeddings:
 
-    def __init__(self,processed_data_path,index_path):
+    def __init__(self,
+                 processed_data_path = None,
+                 index_path = None,
+                 embedding_model_name = None,
+                 embed_device = None,
+                 embed_batch_size = None,
+                 col_restaurant_id = None,
+                 index_metric = None
+                 ):
         """
         @param processed_data_path: import file path for retrieving cleaned and chunked reviews data
         @param index_path: export path for storing reviews as embeddings, along with metadata
         """
-        self.processed_data_path = processed_data_path
-        self.index_path = index_path
+        # defaults from config.py
+        defaults = {
+            "processed_data_path": config.DATA_DIR_PROC,
+            "index_path": config.INDEX_DIR,
+            "embedding_model_name": config.EMBEDDING_MODEL_NAME,
+            "embed_device": config.EMBED_DEVICE,
+            "embed_batch_size": config.EMBED_BATCH_SIZE,
+            "col_restaurant_id": config.COL_RESTAURANT_ID,
+            "index_metric": config.INDEX_METRIC,
+        }
+
+        # overrides supplied by caller (example)
+        overrides = {
+            "processed_data_path": processed_data_path,
+            "index_path": index_path,
+            "embedding_model_name": embedding_model_name,
+            "embed_device": embed_device,
+            "embed_batch_size": embed_batch_size,
+            "col_restaurant_id": col_restaurant_id,
+            "index_metric": index_metric,
+        }
+
+        for name,default in defaults.items():
+            value = overrides[name] if overrides[name] is not None else default
+            setattr(self,name,value)
+
 
     
     def load_chunked_reviews_data(self):
@@ -97,26 +129,26 @@ class CreateReviewEmbeddings:
         chunks_df = self.load_chunked_reviews_data()
         texts = chunks_df["chunk"].tolist()
         
-        model = self.load_embedding_model(config.EMBEDDING_MODEL_NAME,config.EMBED_DEVICE)
-        print(f"Loaded model '{config.EMBEDDING_MODEL_NAME}' from HuggingFace.")
+        model = self.load_embedding_model(self.embedding_model_name,self.embed_device)
+        print(f"Loaded model '{self.embedding_model_name}' from HuggingFace.")
         print("Starting embedding process:")
-        embeddings = self.embed_texts(model,texts,batch_size = config.EMBED_BATCH_SIZE,normalize_flag = True)
+        embeddings = self.embed_texts(model,texts,batch_size = self.embed_batch_size,normalize_flag = True)
         print("Completed embedding process.")
 
-        for restaurant_id, idx in chunks_df.groupby(config.COL_RESTAURANT_ID).groups.items():
+        for restaurant_id, idx in chunks_df.groupby(self.col_restaurant_id).groups.items():
             idx_list = list(idx)
             X_r = embeddings[idx_list]
             meta_r = chunks_df.loc[idx_list].copy()
 
-            index = self.build_faiss_index(X_r,metric = config.INDEX_METRIC)
+            index = self.build_faiss_index(X_r,metric = self.index_metric)
             faiss.write_index(index,os.path.join(self.index_path,f"{restaurant_id}.faiss"))
 
             meta_r.reset_index(drop = True).to_parquet(os.path.join(self.index_path,f"{restaurant_id}_meta.parquet"),engine = "pyarrow",index = False)
 
-        faiss_created = list(config.INDEX_DIR.glob("*.faiss"))  
+        faiss_created = list(self.index_path.glob("*.faiss"))  
         print(f"{len(faiss_created)} .faiss files created in the index directory.")  
 
-        meta_created = list(config.INDEX_DIR.glob("*.parquet"))  
+        meta_created = list(self.index_path.glob("*.parquet"))  
         print(f"{len(meta_created)} metadata files (.parquet) created in the index directory.")  
 
         return True
