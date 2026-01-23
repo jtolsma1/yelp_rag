@@ -5,11 +5,44 @@ import src.config as config
 
 class SummarizeRelevantReviewText:
 
-    def __init__(self,processed_data_path):
+    def __init__(self,
+                 processed_data_path = None,
+                 col_restaurant_id = None,
+                 topics = None,
+                 ollama_model = None,
+                 temperature = None,
+                 ollama_base_url = None
+                 ):
         """
         @param processed_data_path: import file path for retrieving cleaned and chunked reviews data
+        @param col_restaurant_id: column that stores the restaurant id in the Yelp dataset and metadata array
+        @param topics: dictionary of topic headings (keys) and keywords associated with those topics (values)
+        @param ollama_model: model called in Ollama to summarize the text chunks returned by the index search
+        @param temperature: LLM randomness parameter
+        @param ollama_base_url: URL for accessing Ollama via HTTP
         """
-        self.processed_data_path = processed_data_path
+
+        defaults = {
+            "processed_data_path": config.DATA_DIR_PROC,
+            "col_restaurant_id": config.COL_RESTAURANT_ID,
+            "topics": config.TOPICS,
+            "ollama_model": config.OLLAMA_MODEL,
+            "temperature": config.TEMPERATURE,
+            "ollama_base_url": config.OLLAMA_BASE_URL,
+        }
+
+        overrides = {
+            "processed_data_path": processed_data_path,
+            "col_restaurant_id": col_restaurant_id,
+            "topics": topics,
+            "ollama_model": ollama_model,
+            "temperature": temperature,
+            "ollama_base_url": ollama_base_url,
+        }
+
+        for name,default in defaults.items():
+            value = overrides[name] if overrides[name] is not None else default
+            setattr(self,name,value)
 
     def get_stored_relevant_review_text(self):
         """
@@ -18,18 +51,18 @@ class SummarizeRelevantReviewText:
         @return restaurant_ids: list of unique restaurant ids in relevant_chunk_df
         """
         relevant_chunk_df = pd.read_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"))
-        restaurant_ids = relevant_chunk_df[config.COL_RESTAURANT_ID].unique().tolist()
+        restaurant_ids = relevant_chunk_df[self.col_restaurant_id].unique().tolist()
 
         return relevant_chunk_df,restaurant_ids
     
-    @staticmethod
-    def call_ollama(prompt,model,temperature=0.2):
+
+    def call_ollama(self,prompt,model,temperature=0.2):
         """
         Pass a string-formatted prompt to Ollama and store the response as a JSON object
         @return: Ollama model response as JSON object
         """
     
-        url = "http://localhost:11434/api/generate"
+        url = self.ollama_base_url
         payload = {
             "model":model,
             "prompt":prompt,
@@ -58,7 +91,7 @@ class SummarizeRelevantReviewText:
             restaurant_df = relevant_chunk_df[relevant_chunk_df["business_id"] == id]
             restaurant_name = restaurant_df.iloc[0]["restaurant_name"]
             restaurant_summary_dict = {}
-            for topic in config.TOPICS.keys():
+            for topic in self.topics.keys():
                 topic_df = restaurant_df[restaurant_df["topic"]==topic]
                 context = f"""
                 You are analyzing and synthesizing customer reviews for a restaurant called {restaurant_name}, where the main topic is:
@@ -92,11 +125,11 @@ class SummarizeRelevantReviewText:
                     i+=1
                 
                 summary = self.call_ollama(prompt = context,
-                                    model = config.OLLAMA_MODEL,
-                                    temperature=config.TEMPERATURE
+                                    model = self.ollama_model,
+                                    temperature=self.temperature
                                     ).replace("\n"," ")
                 restaurant_summary_dict.update({topic:summary})
-            print(f"Summary for {restaurant_name} complete.")
+            print(f"    Summary for {restaurant_name} complete.")
             summary_dict.update({restaurant_name:restaurant_summary_dict})
 
         summary_df = pd.DataFrame(summary_dict).transpose()

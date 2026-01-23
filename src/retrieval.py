@@ -7,13 +7,58 @@ from pathlib import Path
 
 class RetrieveRelevantText:
 
-    def __init__(self,processed_data_path,index_path):
+    def __init__(self,
+                 processed_data_path = None,
+                 index_path = None,
+                 embedding_model_name = None,
+                 embed_device = None,
+                 topics = None,
+                 max_chunks_per_review = None,
+                 max_chunks_per_topic = None,
+                 top_k_per_topic = None,
+                 metadata_cols = None
+                 ):
         """
-        @param processed_data_path: import file path for retrieving cleaned and chunked reviews data
+        @param processed_data_path: file path for storing and retrieving model-processed datasets
         @param index_path: export path for storing reviews as embeddings, along with metadata
+        @param embedding_model_name: model name retrieved from HuggingFace and used to create embeddings of review text chunks
+        @param embed_device: specifies CPU or GPU as the device that runs the embedding model
+        @param topics: dictionary of topic headings (keys) and keywords associated with those topics (values)
+        @param max_chunks_per_review: maximum number of chunks retrieved per review; default is 1 to avoid a single review dominating the RAG results 
+        @param max_chunks_per_topic: total number of chunks per topic submitted to the LLM for summarization
+        @param top_k_per_topic: total chunks returned in the vector search; reduced after filtering to 'max_chunks_per_review'
+        @param metadata_cols: columns needed for the metadata array
         """
-        self.processed_data_path = processed_data_path
-        self.index_path = index_path
+
+        # defaults from config.py
+        defaults = {
+            "processed_data_path": config.DATA_DIR_PROC,
+            "index_path": config.INDEX_DIR,
+            "embedding_model_name": config.EMBEDDING_MODEL_NAME,
+            "embed_device": config.EMBED_DEVICE,
+            "topics": config.TOPICS,
+            "max_chunks_per_review": config.MAX_CHUNKS_PER_REVIEW,
+            "max_chunks_per_topic": config.MAX_CHUNKS_PER_TOPIC,
+            "top_k_per_topic": config.TOP_K_PER_TOPIC,
+            "metadata_cols": config.METADATA_COLS,
+        }
+
+        # overrides supplied by caller (example)
+        overrides = {
+            "processed_data_path": processed_data_path,
+            "index_path": index_path,
+            "embedding_model_name": embedding_model_name,
+            "embed_device": embed_device,
+            "topics": topics,
+            "max_chunks_per_review": max_chunks_per_review,
+            "max_chunks_per_topic": max_chunks_per_topic,
+            "top_k_per_topic": top_k_per_topic,
+            "metadata_cols": metadata_cols,
+        }
+
+        for name,default in defaults.items():
+            value = overrides[name] if overrides[name] is not None else default
+            setattr(self,name,value)
 
 
     def get_index_file_list(self):
@@ -60,17 +105,16 @@ class RetrieveRelevantText:
         Create embeddings for all topic words relevant to the RAG.s
         @return: a dictionary of embeddings with one entry per topic word
         """
-        model = self.load_embedding_model(config.EMBEDDING_MODEL_NAME,config.EMBED_DEVICE)
+        model = self.load_embedding_model(self.embedding_model_name,self.embed_device)
         query_embed = {}
-        for topic,keywords in config.TOPICS.items():
+        for topic,keywords in self.topics.items():
             query = model.encode([keywords],convert_to_numpy=True,normalize_embeddings=True)
             query_embed.update({topic:query})
         
         return query_embed
 
 
-    @staticmethod
-    def convert_similarity_arrays_to_df(score_array,index_array,metadata,metadata_cols):
+    def convert_similarity_arrays_to_df(self,score_array,index_array,metadata,metadata_cols):
         """
         Converts raw similarity arrays from FAISS to a dataframe of relevant text chunks.
         Limits returned values to a preconfigured number of chunks per review to avoid duplicated statements.
@@ -101,7 +145,7 @@ class RetrieveRelevantText:
         )
 
         df = df.sort_values(by = "scores",ascending=False)
-        df = df.groupby("review_id",as_index=False).head(config.MAX_CHUNKS_PER_REVIEW)
+        df = df.groupby("review_id",as_index=False).head(self.max_chunks_per_review)
         return df
 
 
@@ -121,13 +165,13 @@ class RetrieveRelevantText:
             meta_file_path = file["metadata_file"]
             index = faiss.read_index(index_file_path)
             meta = pd.read_parquet(meta_file_path)
-            for topic in config.TOPICS.keys():
-                D,I = index.search(query_embed[topic],k = config.TOP_K_PER_TOPIC)
-                df = self.convert_similarity_arrays_to_df(D,I,meta,config.METADATA_COLS)
+            for topic in self.topics.keys():
+                D,I = index.search(query_embed[topic],k = self.top_k_per_topic)
+                df = self.convert_similarity_arrays_to_df(D,I,meta,self.metadata_cols)
                 if df.empty:
                     empties.update({file["business_id"]:topic})
                 df.insert(0,"topic",topic)
-                df = df.iloc[:config.MAX_CHUNKS_PER_TOPIC]
+                df = df.iloc[:self.max_chunks_per_topic]
                 result_df = pd.concat([result_df,df],axis = 0,ignore_index=True)
 
 
