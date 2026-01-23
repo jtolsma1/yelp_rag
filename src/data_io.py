@@ -22,8 +22,8 @@ class ImportYelpReviewText:
         @param raw_data_path: file path for sourcing the review content and business identifiers from the entire Yelp dataset
         @param sampled_data_path_reviews: file path for storing data sampled from the Yelp dataset
         @param n_import_rows: number of rows to sample from the entire Yelp dataset (>= 100k recommended for RAG)
-        @param col_business_category: column in Yelp dataset that stores business category ("restaurant", "hotel")
-        @param col_review_id: column in Yelp dataset that stores unique review id
+        @param col_business_category: name of column in Yelp dataset that stores business category ("restaurant", "hotel")
+        @param col_review_id: name of column in Yelp dataset that stores unique review id
         @param min_reviews: minimum number of reviews needed for inclusion in RAG
         @param n_restaurants: number of restaurants to use for the RAG results
         """
@@ -53,14 +53,6 @@ class ImportYelpReviewText:
         for name, default in defaults.items():
             value = overrides[name] if overrides[name] is not None else default
             setattr(self, name, value)
-        
-        # # constants imported from config.py
-        # self.n_import_rows = config.N_IMPORT_ROWS
-        # self.col_business_category = config.COL_BUSINESS_CATEGORY
-        # self.col_restaurant_id = config.COL_RESTAURANT_ID
-        # self.col_review_id = config.COL_REVIEW_ID
-        # self.min_reviews = config.MIN_REVIEWS
-        # self.n_restaurants = config.N_RESTAURANTS
 
 
     def import_sample_from_complete_dataset(self,import_path):

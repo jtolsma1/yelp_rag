@@ -19,8 +19,13 @@ class CreateReviewEmbeddings:
                  index_metric = None
                  ):
         """
-        @param processed_data_path: import file path for retrieving cleaned and chunked reviews data
+        @param processed_data_path: file path for storing and retrieving model-processed datasets
         @param index_path: export path for storing reviews as embeddings, along with metadata
+        @param embedding_model_name: model name retrieved from HuggingFace and used to create embeddings of review text chunks
+        @param embed_device: specifies CPU or GPU as the device that runs the embedding model
+        @param embed_batch_size: controls the number of chunks that are embedded at once
+        @param col_restaurant_id: column that stores the restaurant id in the Yelp dataset
+        @param index_metric: metric (cosine or l2) used to generate vector search results from indexes
         """
         # defaults from config.py
         defaults = {
