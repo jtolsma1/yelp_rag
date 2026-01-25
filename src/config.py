@@ -58,7 +58,7 @@ TOPIC_ORDER = {"food","service","ambiance"}
 
 # local LLM
 OLLAMA_MODEL = "llama3.1:8b"
-OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_BASE_URL = "http://localhost:11434/api/generate"
 TEMPERATURE = 0.4
 MAX_OUTPUT_TOKENS = 600
 
