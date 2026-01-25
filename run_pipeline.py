@@ -13,11 +13,11 @@ class YelpRAGPipelineRunner:
     def __init__(self):
         print("Start Yelp RAG Pipeline")
 
-    def run_pipeline(self,status_cb: Optional[StatusCB] = None):
+    def run_pipeline(self,random_state,status_cb: Optional[StatusCB] = None,):
 
         print("\nData download and sampling pipeline started.\n")
         io = ImportYelpReviewText()
-        io.generate_final_restaurant_list_for_rag()
+        io.generate_final_restaurant_list_for_rag(random_state = random_state)
         print("\nData download and sampling pipeline complete.")
 
         print("\nCleaning and chunking pipeline started.\n")
