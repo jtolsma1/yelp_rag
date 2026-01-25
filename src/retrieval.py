@@ -16,7 +16,8 @@ class RetrieveRelevantText:
                  max_chunks_per_review = None,
                  max_chunks_per_topic = None,
                  top_k_per_topic = None,
-                 metadata_cols = None
+                 metadata_cols = None,
+                 parquet_engine = None
                  ):
         """
         @param processed_data_path: file path for storing and retrieving model-processed datasets
@@ -28,6 +29,7 @@ class RetrieveRelevantText:
         @param max_chunks_per_topic: total number of chunks per topic submitted to the LLM for summarization
         @param top_k_per_topic: total chunks returned in the vector search; reduced after filtering to 'max_chunks_per_review'
         @param metadata_cols: columns needed for the metadata array
+        @param parquet_engine: engine used for encoding parquet files
         """
 
         # defaults from config.py
@@ -41,6 +43,7 @@ class RetrieveRelevantText:
             "max_chunks_per_topic": config.MAX_CHUNKS_PER_TOPIC,
             "top_k_per_topic": config.TOP_K_PER_TOPIC,
             "metadata_cols": config.METADATA_COLS,
+            "parquet_engine": config.PARQUET_ENGINE
         }
 
         # overrides supplied by caller (example)
@@ -54,6 +57,7 @@ class RetrieveRelevantText:
             "max_chunks_per_topic": max_chunks_per_topic,
             "top_k_per_topic": top_k_per_topic,
             "metadata_cols": metadata_cols,
+            "parquet_engine": parquet_engine
         }
 
         for name,default in defaults.items():
@@ -182,6 +186,6 @@ class RetrieveRelevantText:
                 print(f"  business id = {k}, topic = {v}")
         else:
             print("  No empty results found.")
-        result_df.to_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"),engine = "pyarrow")
+        result_df.to_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"),engine = self.parquet_engine)
         print(f"  Relevant text dataframe uploaded to {os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet")}")
         return True

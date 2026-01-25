@@ -11,7 +11,8 @@ class SummarizeRelevantReviewText:
                  topics = None,
                  ollama_model = None,
                  temperature = None,
-                 ollama_base_url = None
+                 ollama_base_url = None,
+                 parquet_engine = None
                  ):
         """
         @param processed_data_path: import file path for retrieving cleaned and chunked reviews data
@@ -20,6 +21,7 @@ class SummarizeRelevantReviewText:
         @param ollama_model: model called in Ollama to summarize the text chunks returned by the index search
         @param temperature: LLM randomness parameter
         @param ollama_base_url: URL for accessing Ollama via HTTP
+        @param parquet_engine: engine used for encoding parquet files
         """
 
         defaults = {
@@ -29,6 +31,7 @@ class SummarizeRelevantReviewText:
             "ollama_model": config.OLLAMA_MODEL,
             "temperature": config.TEMPERATURE,
             "ollama_base_url": config.OLLAMA_BASE_URL,
+            "parquet_engine": config.PARQUET_ENGINE
         }
 
         overrides = {
@@ -38,6 +41,7 @@ class SummarizeRelevantReviewText:
             "ollama_model": ollama_model,
             "temperature": temperature,
             "ollama_base_url": ollama_base_url,
+            "parquet_engine": parquet_engine
         }
 
         for name,default in defaults.items():
@@ -132,7 +136,7 @@ class SummarizeRelevantReviewText:
             print(f"     Summary for {restaurant_name} complete.")
             summary_dict.update({restaurant_name:restaurant_summary_dict})
 
-        summary_df = pd.DataFrame(summary_dict).transpose()
+        summary_df = pd.DataFrame(summary_dict).transpose().reset_index()
         return summary_df
 
     def summarize_relevant_review_text(self):
@@ -142,6 +146,6 @@ class SummarizeRelevantReviewText:
         """
         relevant_chunk_df, restaurant_ids = self.get_stored_relevant_review_text()
         summary_df = self.retrieve_relevant_text_summaries_from_ollama(relevant_chunk_df,restaurant_ids)
-        summary_df.to_parquet(os.path.join(self.processed_data_path,"summaries.parquet"),engine = "pyarrow")
+        summary_df.to_parquet(os.path.join(self.processed_data_path,"summaries.parquet"),engine = self.parquet_engine)
         print(f"  LLM summaries of review text chunks stored at {os.path.join(self.processed_data_path,"summaries.parquet")}")
         return True

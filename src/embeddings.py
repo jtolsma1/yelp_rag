@@ -16,7 +16,9 @@ class CreateReviewEmbeddings:
                  embed_device = None,
                  embed_batch_size = None,
                  col_restaurant_id = None,
-                 index_metric = None
+                 index_metric = None,
+                 normalize_embeddings = None,
+                 parquet_engine = None
                  ):
         """
         @param processed_data_path: file path for storing and retrieving model-processed datasets
@@ -26,6 +28,7 @@ class CreateReviewEmbeddings:
         @param embed_batch_size: controls the number of chunks that are embedded at once
         @param col_restaurant_id: column that stores the restaurant id in the Yelp dataset
         @param index_metric: metric (cosine or l2) used to generate vector search results from indexes
+        @param parquet_engine: engine used for encoding parquet files
         """
         # defaults from config.py
         defaults = {
@@ -36,6 +39,8 @@ class CreateReviewEmbeddings:
             "embed_batch_size": config.EMBED_BATCH_SIZE,
             "col_restaurant_id": config.COL_RESTAURANT_ID,
             "index_metric": config.INDEX_METRIC,
+            "normalize_embeddings":config.NORMALIZE_EMBEDDINGS,
+            "parquet_engine":config.PARQUET_ENGINE
         }
 
         # overrides supplied by caller (example)
@@ -47,12 +52,13 @@ class CreateReviewEmbeddings:
             "embed_batch_size": embed_batch_size,
             "col_restaurant_id": col_restaurant_id,
             "index_metric": index_metric,
+            "normalize_embeddings": normalize_embeddings,
+            "parquet_engine":parquet_engine
         }
 
         for name,default in defaults.items():
             value = overrides[name] if overrides[name] is not None else default
             setattr(self,name,value)
-
 
     
     def load_chunked_reviews_data(self):
@@ -137,7 +143,7 @@ class CreateReviewEmbeddings:
         model = self.load_embedding_model(self.embedding_model_name,self.embed_device)
         print(f"  Loaded model '{self.embedding_model_name}' from HuggingFace.")
         print("  Starting embedding process:")
-        embeddings = self.embed_texts(model,texts,batch_size = self.embed_batch_size,normalize_flag = True)
+        embeddings = self.embed_texts(model,texts,batch_size = self.embed_batch_size,normalize_flag = self.normalize_embeddings)
         print("  Completed embedding process.")
 
         for restaurant_id, idx in chunks_df.groupby(self.col_restaurant_id).groups.items():
@@ -148,7 +154,7 @@ class CreateReviewEmbeddings:
             index = self.build_faiss_index(X_r,metric = self.index_metric)
             faiss.write_index(index,os.path.join(self.index_path,f"{restaurant_id}.faiss"))
 
-            meta_r.reset_index(drop = True).to_parquet(os.path.join(self.index_path,f"{restaurant_id}_meta.parquet"),engine = "pyarrow",index = False)
+            meta_r.reset_index(drop = True).to_parquet(os.path.join(self.index_path,f"{restaurant_id}_meta.parquet"),engine = self.parquet_engine,index = False)
 
         faiss_created = list(self.index_path.glob("*.faiss"))  
         print(f"  {len(faiss_created)} .faiss files created in the index directory.")  

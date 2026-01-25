@@ -19,7 +19,8 @@ class CleanChunkYelpReviews:
                  col_review_id = None,
                  col_restaurant_name = None,
                  col_stars = None,
-                 col_date = None
+                 col_date = None,
+                 parquet_engine = None
                  ):
         """
         Defaults to all parameters as set in config.py; overrides parameters when stated in function call.
@@ -34,6 +35,7 @@ class CleanChunkYelpReviews:
         @param col_restaurant_name: name of column in Yelp dataset that stores the restaurant name
         @param col_stars: name of column in Yelp dataset that stores the star rating for each review
         @param col_date: name of column in Yelp dataset that stores the date that the review was submitted
+        @param parquet_engine: engine used for encoding parquet files
         """
 
         # constants imported from config.py
@@ -51,6 +53,7 @@ class CleanChunkYelpReviews:
             "col_restaurant_name": config.COL_RESTAURANT_NAME,
             "col_stars": config.COL_STARS,
             "col_date": config.COL_DATE,
+            "parquet_engine": config.PARQUET_ENGINE
         }
 
         # overrides supplied by caller (example pattern)
@@ -67,6 +70,7 @@ class CleanChunkYelpReviews:
             "col_restaurant_name": col_restaurant_name,
             "col_stars": col_stars,
             "col_date": col_date,
+            "parquet_engine": parquet_engine
         }
 
         for name,default in defaults.items():
@@ -214,6 +218,6 @@ class CleanChunkYelpReviews:
         cleaned_chunked = self.generate_chunk_df(cleaned_reviews)
 
         print(f"  Storing chunked data as parquet at {self.processed_data_path}")
-        cleaned_chunked.to_parquet(self.processed_data_path,engine = "pyarrow")
+        cleaned_chunked.to_parquet(self.processed_data_path,engine = self.parquet_engine)
 
         return True

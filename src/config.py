@@ -54,8 +54,6 @@ TOPICS = {
     "ambiance":"ambiance atmosphere decor music lighting seating noise vibe"
 }
 
-TOPIC_ORDER = {"food","service","ambiance"}
-
 # local LLM
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_BASE_URL = "http://localhost:11434/api/generate"
@@ -67,6 +65,7 @@ ENABLE_CACHE = True
 CACHE_VER = "v1"
 LOG_LEVEL = "INFO"
 
+# saving objects
 METADATA_COLS = {
     "chunk_id_col":"chunk_id",
     "business_id_col":"business_id",
@@ -75,3 +74,4 @@ METADATA_COLS = {
     "review_id_col":"review_id",
     "chunk_col":"chunk"
 }
+PARQUET_ENGINE = "pyarrow"
