@@ -137,6 +137,7 @@ class SummarizeRelevantReviewText:
             summary_dict.update({restaurant_name:restaurant_summary_dict})
 
         summary_df = pd.DataFrame(summary_dict).transpose().reset_index()
+        summary_df = summary_df.rename(columns = {"index":"restaurant_name"})
         return summary_df
 
     def summarize_relevant_review_text(self):

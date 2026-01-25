@@ -12,7 +12,6 @@ st.title("Yelp Restaurant Review Summaries")
 @st.cache_data
 def load_summaries(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
-    df = df.reset_index().rename(columns = {"index":"restaurant_name"})
     # Basic safety: ensure expected columns exist
     expected = {"restaurant_name", "food", "service", "ambiance"}
     missing = expected - set(df.columns)
