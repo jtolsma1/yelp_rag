@@ -15,7 +15,8 @@ class ImportYelpReviewText:
                  col_restaurant_id = None,
                  col_review_id = None,
                  min_reviews = None,
-                 n_restaurants = None
+                 n_restaurants = None,
+                 random_state = None
                  ):
         """
         Defaults to all parameters as set in config.py; overrides parameters when stated in function call.
@@ -37,6 +38,7 @@ class ImportYelpReviewText:
             "col_review_id": config.COL_REVIEW_ID,
             "min_reviews": config.MIN_REVIEWS,
             "n_restaurants": config.N_RESTAURANTS,
+            "random_state": config.RANDOM_STATE
         }
 
         overrides = {
@@ -48,6 +50,7 @@ class ImportYelpReviewText:
             "col_review_id": col_review_id,
             "min_reviews": min_reviews,
             "n_restaurants": n_restaurants,
+            "random_state": random_state
         }
 
         for name, default in defaults.items():
@@ -109,7 +112,7 @@ class ImportYelpReviewText:
 
         ids_array = input_df.groupby(self.col_restaurant_id)[self.col_review_id].nunique()
 
-        selected_ids = ids_array[ids_array > self.min_reviews].sample(self.n_restaurants,random_state = 5).index.tolist()
+        selected_ids = ids_array[ids_array > self.min_reviews].sample(self.n_restaurants,random_state = self.random_state).index.tolist()
 
         output_df = input_df[input_df[self.col_restaurant_id].isin(selected_ids)]
 

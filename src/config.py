@@ -13,6 +13,7 @@ CACHE_DIR = PROJECT_DIR / "cache"
 N_IMPORT_ROWS = 500000
 MIN_REVIEWS = 100
 N_RESTAURANTS = 10
+RANDOM_STATE = 5 # set to None for random selection
 
 # column definitions
 COL_BUSINESS_CATEGORY = "categories"
