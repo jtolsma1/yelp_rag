@@ -123,17 +123,16 @@ class ImportYelpReviewText:
         a small quantity of restaurants with a minimum number of reviews to use in the RAG.
         @return: True if executed successfully
         """
-        print("Sampling Yelp datasets...")
+        print("  Sampling Yelp datasets...")
         
         reviews_sample = self.import_yelp_data_sample()
         
-        print(f"Yelp dataset sample with shape {reviews_sample.shape} created.")
-        print(f"Yelp dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_samples.csv")}")
-        print(f"Sampling Yelp dataset for {self.n_restaurants} restaurants to use in this RAG demo.")
-        print("")
+        print(f"  Yelp dataset sample with shape {reviews_sample.shape} created.")
+        print(f"  Yelp dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_samples.csv")}")
+        print(f"  Sampling Yelp dataset for {self.n_restaurants} restaurants to use in this RAG demo.")
         
         reviews_df = self.select_restaurants_for_rag(reviews_sample)
         
-        print(f"RAG dataset consisting of {self.n_restaurants} and with shape {reviews_df.shape} created.")
-        print(f"RAG dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_df.csv")}")
+        print(f"  RAG dataset consisting of {self.n_restaurants} and with shape {reviews_df.shape} created.")
+        print(f"  RAG dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_df.csv")}")
         return True

@@ -135,10 +135,10 @@ class CreateReviewEmbeddings:
         texts = chunks_df["chunk"].tolist()
         
         model = self.load_embedding_model(self.embedding_model_name,self.embed_device)
-        print(f"Loaded model '{self.embedding_model_name}' from HuggingFace.")
-        print("Starting embedding process:")
+        print(f"  Loaded model '{self.embedding_model_name}' from HuggingFace.")
+        print("  Starting embedding process:")
         embeddings = self.embed_texts(model,texts,batch_size = self.embed_batch_size,normalize_flag = True)
-        print("Completed embedding process.")
+        print("  Completed embedding process.")
 
         for restaurant_id, idx in chunks_df.groupby(self.col_restaurant_id).groups.items():
             idx_list = list(idx)
@@ -151,9 +151,9 @@ class CreateReviewEmbeddings:
             meta_r.reset_index(drop = True).to_parquet(os.path.join(self.index_path,f"{restaurant_id}_meta.parquet"),engine = "pyarrow",index = False)
 
         faiss_created = list(self.index_path.glob("*.faiss"))  
-        print(f"{len(faiss_created)} .faiss files created in the index directory.")  
+        print(f"  {len(faiss_created)} .faiss files created in the index directory.")  
 
         meta_created = list(self.index_path.glob("*.parquet"))  
-        print(f"{len(meta_created)} metadata files (.parquet) created in the index directory.")  
+        print(f"  {len(meta_created)} metadata files (.parquet) created in the index directory.")  
 
         return True

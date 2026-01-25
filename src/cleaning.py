@@ -113,7 +113,7 @@ class CleanChunkYelpReviews:
 
         df[col_text] = df[col_text].str.replace(r"\s+", " ", regex=True).str.strip()
         
-        print(f"{before - len(df)} reviews dropped in cleaning step.")
+        print(f"  {before - len(df)} reviews dropped in cleaning step.")
         return df
 
     @staticmethod
@@ -131,7 +131,7 @@ class CleanChunkYelpReviews:
         """
         before = len(df)
         df = df.drop_duplicates(subset = [self.col_text])
-        print(f"{before - len(df)} reviews dropped in deduplicating step.")
+        print(f"  {before - len(df)} reviews dropped in deduplicating step.")
         return df
 
 
@@ -207,13 +207,13 @@ class CleanChunkYelpReviews:
         """
         reviews_df = self.load_rag_reviews_data()
 
-        print("Executing clean/unicode normalization/deduplication step.")
+        print("  Executing clean/unicode normalization/deduplication step.")
         cleaned_reviews = self.clean_normalize_deduplicate(reviews_df)
 
-        print(f"Splitting reviews into chunks of maximum {self.chunk_chars} characters")
+        print(f"  Splitting reviews into chunks of maximum {self.chunk_chars} characters")
         cleaned_chunked = self.generate_chunk_df(cleaned_reviews)
 
-        print(f"Storing chunked data as parquet at {self.processed_data_path}")
+        print(f"  Storing chunked data as parquet at {self.processed_data_path}")
         cleaned_chunked.to_parquet(self.processed_data_path,engine = "pyarrow")
 
         return True

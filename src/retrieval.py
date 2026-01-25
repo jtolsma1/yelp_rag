@@ -175,13 +175,13 @@ class RetrieveRelevantText:
                 result_df = pd.concat([result_df,df],axis = 0,ignore_index=True)
 
 
-        print(f"Relevant text dataframe created using FAISS vector search with shape {result_df.shape}.")
+        print(f"  Relevant text dataframe created using FAISS vector search with shape {result_df.shape}.")
         if empties:
-            print(f"The following business ids and topics returned empty results:")
+            print(f"  The following business ids and topics returned empty results:")
             for k,v in empties:
-                print(f"business id = {k}, topic = {v}")
+                print(f"  business id = {k}, topic = {v}")
         else:
-            print("No empty results found.")
+            print("  No empty results found.")
         result_df.to_parquet(os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet"),engine = "pyarrow")
-        print(f"Relevant text dataframe uploaded to {os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet")}")
+        print(f"  Relevant text dataframe uploaded to {os.path.join(self.processed_data_path,"topic_relevant_review_chunks.parquet")}")
         return True

@@ -129,7 +129,7 @@ class SummarizeRelevantReviewText:
                                     temperature=self.temperature
                                     ).replace("\n"," ")
                 restaurant_summary_dict.update({topic:summary})
-            print(f"    Summary for {restaurant_name} complete.")
+            print(f"     Summary for {restaurant_name} complete.")
             summary_dict.update({restaurant_name:restaurant_summary_dict})
 
         summary_df = pd.DataFrame(summary_dict).transpose()
@@ -141,9 +141,7 @@ class SummarizeRelevantReviewText:
         @return: True if executed successfully
         """
         relevant_chunk_df, restaurant_ids = self.get_stored_relevant_review_text()
-        print("LLM summarization step starting:")
         summary_df = self.retrieve_relevant_text_summaries_from_ollama(relevant_chunk_df,restaurant_ids)
-        print("LLM summarization step complete.")
         summary_df.to_parquet(os.path.join(self.processed_data_path,"summaries.parquet"),engine = "pyarrow")
-        print(f"LLM summaries of review text chunks stored at {os.path.join(self.processed_data_path,"summaries.parquet")}")
+        print(f"  LLM summaries of review text chunks stored at {os.path.join(self.processed_data_path,"summaries.parquet")}")
         return True
