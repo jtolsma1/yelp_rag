@@ -9,6 +9,16 @@ DATA_PATH = os.path.join(config.DATA_DIR_PROC,"summaries.parquet")
 st.set_page_config(page_title="Yelp Restaurant Review Summaries", layout="wide")
 st.title("Yelp Restaurant Review Summaries")
 
+st.markdown(
+"""
+This dashboard summarizes a sample of Yelp customer reviews using a
+retrieval-augmented generation (RAG) pipeline.
+
+Select a restaurant below to see concise summaries of what customers
+say about **food**, **service**, and **ambiance**.
+"""
+)
+
 @st.cache_data
 def load_summaries(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
@@ -27,7 +37,7 @@ df = load_summaries(DATA_PATH)
 
 # --- Restaurant selector ---
 restaurant = st.selectbox(
-    "Choose a restaurant",
+    "Restaurant",
     df["restaurant_name"].tolist(),
     index=0 if len(df) else None,
 )
