@@ -2,12 +2,43 @@ import os
 from pathlib import Path
 import pandas as pd
 import streamlit as st
+from run_pipeline import YelpRAGPipelineRunner
 import src.config as config
 
 DATA_PATH = os.path.join(config.DATA_DIR_PROC,"summaries.parquet")
 
 st.set_page_config(page_title="Yelp Restaurant Review Summaries", layout="wide")
 st.title("Yelp Restaurant Review Summaries")
+
+status_box = st.empty()
+progress_bar = st.progress(0)
+
+def make_status_cb():
+    def status_cb(event:dict):
+        msg = event.get("message","")
+        restaurant_no = event.get("restaurant_no")
+        total = event.get("total")
+
+        if msg:
+            status_box.info(msg)
+        
+        if restaurant_no is not None and total:
+            progress_bar.progress(int((restaurant_no / total)*100))
+    
+    return status_cb
+
+if st.button("Run pipeline (test status)"):
+    status_box.info("Starting pipeline...")
+    progress_bar.progress(0)
+    cb = make_status_cb()
+    
+    cb({"message": "Callback is wired ✅", "restaurant_no": 0, "total": 10})
+
+    runner = YelpRAGPipelineRunner()
+    runner.run_pipeline(status_cb=cb)
+
+    status_box.success("Pipeline finished.")
+    progress_bar.progress(100)
 
 st.markdown(
 """

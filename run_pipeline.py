@@ -1,4 +1,5 @@
 import os
+from typing import Callable,Optional
 from src.data_io import ImportYelpReviewText
 from src.cleaning import CleanChunkYelpReviews
 from src.embeddings import CreateReviewEmbeddings
@@ -6,12 +7,13 @@ from src.retrieval import RetrieveRelevantText
 from src.summarization import SummarizeRelevantReviewText
 from src import config
 
+StatusCB = Callable[[dict],None]
 class YelpRAGPipelineRunner:
     
     def __init__(self):
         print("Start Yelp RAG Pipeline")
 
-    def run_pipeline(self):
+    def run_pipeline(self,status_cb: Optional[StatusCB] = None):
 
         print("\nData download and sampling pipeline started.\n")
         io = ImportYelpReviewText()
@@ -38,7 +40,7 @@ class YelpRAGPipelineRunner:
 
         print("\nLLM summarization pipeline started.\n")
         sum = SummarizeRelevantReviewText()
-        sum.summarize_relevant_review_text()
+        sum.summarize_relevant_review_text(status_cb = status_cb)
         print("\nLLM summarization pipeline complete.")
 
         print("\nYelp RAG pipeline execution complete.")
