@@ -8,6 +8,7 @@ DATA_DIR_SAMP = os.path.join(PROJECT_DIR,"data","sampled")
 DATA_DIR_PROC = os.path.join(PROJECT_DIR,"data","processed")
 INDEX_DIR = PROJECT_DIR / "indexes"
 CACHE_DIR = PROJECT_DIR / "cache"
+INDEX_EXTENSIONS = (".faiss",".parquet")
 
 # dataset import and setup
 N_IMPORT_ROWS = 500000

@@ -1,5 +1,6 @@
 import os
 from typing import Callable,Optional
+from src.directory_build import BuildDirectoryStructure
 from src.data_io import ImportYelpReviewText
 from src.cleaning import CleanChunkYelpReviews
 from src.embeddings import CreateReviewEmbeddings
@@ -11,9 +12,14 @@ StatusCB = Callable[[dict],None]
 class YelpRAGPipelineRunner:
     
     def __init__(self):
-        print("Start Yelp RAG Pipeline")
+        pass
 
     def run_pipeline(self,random_state,status_cb: Optional[StatusCB] = None,):
+
+        print("\nPreparing file directories.")
+        dir = BuildDirectoryStructure()
+        dir.run_build()
+        print("\nFile directories built.")
 
         print("\nData download and sampling pipeline started.\n")
         io = ImportYelpReviewText()
