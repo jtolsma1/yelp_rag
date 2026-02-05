@@ -10,6 +10,48 @@ DATA_PATH = os.path.join(config.DATA_DIR_PROC,"summaries.parquet")
 st.set_page_config(page_title="Yelp Restaurant Review Summaries", layout="wide")
 st.title("Yelp Restaurant Review Summaries")
 
+st.markdown(
+"""
+This dashboard summarizes a sample of Yelp customer reviews using a
+retrieval-augmented generation (RAG) pipeline.
+
+Select a restaurant below to see concise summaries of what customers
+say about **food**, **service**, and **ambiance**.
+"""
+)
+
+# --- Restaurant selector ---
+
+if "seed" not in st.session_state:
+    st.session_state.seed = 5
+if "randomize" not in st.session_state:
+    st.session_state.randomize = False
+
+col1, col2 = st.columns([2,1])
+
+with col1:
+    seed_val = st.number_input(
+        "Seed (integer)",
+        min_value = 0,
+        step = 1,
+        value = int(st.session_state.seed),
+        disabled = st.session_state.randomize,
+        help = "Random restaurant selections will be reproduced when given the same seed value."
+    )
+with col2:
+    randomize = st.checkbox(
+        "Randomize",
+        value = st.session_state.randomize,
+        help = "if checked, seed is ignored and a truly random selection of restaurants is summarized."
+    )
+
+st.session_state.seed = int(seed_val)
+st.session_state.randomize = bool(randomize)
+
+random_state = None if st.session_state.randomize else st.session_state.seed
+
+st.caption(f"Effective random state: `{random_state}`")
+
 status_box = st.empty()
 progress_bar = st.progress(0)
 
@@ -35,20 +77,10 @@ if st.button("Run pipeline (test status)"):
     cb({"message": "Callback is wired ✅", "restaurant_no": 0, "total": 10})
 
     runner = YelpRAGPipelineRunner()
-    runner.run_pipeline(status_cb=cb)
+    runner.run_pipeline(random_state=random_state,status_cb=cb)
 
     status_box.success("Pipeline finished.")
     progress_bar.progress(100)
-
-st.markdown(
-"""
-This dashboard summarizes a sample of Yelp customer reviews using a
-retrieval-augmented generation (RAG) pipeline.
-
-Select a restaurant below to see concise summaries of what customers
-say about **food**, **service**, and **ambiance**.
-"""
-)
 
 @st.cache_data
 def load_summaries(path: Path) -> pd.DataFrame:
@@ -64,9 +96,12 @@ def load_summaries(path: Path) -> pd.DataFrame:
     df = df.sort_values("restaurant_name").reset_index(drop=True)
     return df
 
-df = load_summaries(DATA_PATH)
+try:
+    df = load_summaries(DATA_PATH)
+except:
+    st.warning("Run the pipeline to generate summaries.")
 
-# --- Restaurant selector ---
+
 restaurant = st.selectbox(
     "Restaurant",
     df["restaurant_name"].tolist(),
