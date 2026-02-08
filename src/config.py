@@ -13,8 +13,8 @@ INDEX_EXTENSIONS = (".faiss",".parquet")
 # dataset import and setup
 N_IMPORT_ROWS = 500000
 MIN_REVIEWS = 100
-N_RESTAURANTS = 2
-RANDOM_STATE = 5 # set to None for random selection
+N_RESTAURANTS = 10
+RANDOM_STATE = 1 # set to None for random selection
 
 # column definitions
 COL_BUSINESS_CATEGORY = "categories"
