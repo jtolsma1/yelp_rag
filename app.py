@@ -33,12 +33,17 @@ say about **food**, **service**, and **ambiance**.
 
 if "df" not in st.session_state:
     st.session_state.df = None
+
+if "n_restaurants" not in st.session_state:
+    st.session_state.n_restaurants = config.N_RESTAURANTS
+
 if "seed" not in st.session_state:
     st.session_state.seed = 1
+
 if "randomize" not in st.session_state:
     st.session_state.randomize = False
 
-col1, col2 = st.columns([2,1])
+col1, col2, col3  = st.columns([2,2,1])
 
 with col1:
     seed_val = st.number_input(
@@ -49,7 +54,18 @@ with col1:
         disabled = st.session_state.randomize,
         help = "Random restaurant selections will be reproduced when given the same seed value."
     )
+
 with col2:
+    n_restaurants_val = st.number_input(
+        "Number of Restaurants",
+        min_value = 2,
+        max_value = 25,
+        step = 1,
+        value = int(st.session_state.n_restaurants),
+        help = "Input the number of restaurants to appear in the summary output."
+    )
+
+with col3:
     randomize = st.checkbox(
         "Randomize",
         value = st.session_state.randomize,
@@ -57,6 +73,7 @@ with col2:
     )
 
 st.session_state.seed = int(seed_val)
+st.session_state.n_restaurants = int(n_restaurants_val)
 st.session_state.randomize = bool(randomize)
 
 random_state = None if st.session_state.randomize else st.session_state.seed
@@ -127,7 +144,7 @@ if st.button("Run RAG Pipeline"):
     cb({"message": "Retrieving Yelp reviews...", "restaurant_no": 0, "total": 10})
 
     runner = YelpRAGPipelineRunner()
-    runner.run_pipeline(random_state=random_state,status_cb=cb)
+    runner.run_pipeline(random_state=random_state,n_restaurants = n_restaurants_val,status_cb=cb)
 
     mtime_ns = DATA_PATH.stat().st_mtime_ns
     df = load_summaries(DATA_PATH,mtime_ns)

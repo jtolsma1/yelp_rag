@@ -14,7 +14,7 @@ class YelpRAGPipelineRunner:
     def __init__(self):
         pass
 
-    def run_pipeline(self,random_state,status_cb: Optional[StatusCB] = None,):
+    def run_pipeline(self,random_state,n_restaurants,status_cb: Optional[StatusCB] = None,):
 
         print("\nPreparing file directories.")
         dir = BuildDirectoryStructure()
@@ -23,7 +23,7 @@ class YelpRAGPipelineRunner:
 
         print("\nData download and sampling pipeline started.\n")
         io = ImportYelpReviewText()
-        io.generate_final_restaurant_list_for_rag(random_state = random_state)
+        io.generate_final_restaurant_list_for_rag(random_state = random_state,n_restaurants = n_restaurants)
         print("\nData download and sampling pipeline complete.")
 
         print("\nCleaning and chunking pipeline started.\n")
