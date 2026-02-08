@@ -8,11 +8,12 @@ DATA_DIR_SAMP = os.path.join(PROJECT_DIR,"data","sampled")
 DATA_DIR_PROC = os.path.join(PROJECT_DIR,"data","processed")
 INDEX_DIR = PROJECT_DIR / "indexes"
 CACHE_DIR = PROJECT_DIR / "cache"
+INDEX_EXTENSIONS = (".faiss",".parquet")
 
 # dataset import and setup
 N_IMPORT_ROWS = 500000
 MIN_REVIEWS = 100
-N_RESTAURANTS = 10
+N_RESTAURANTS = 2
 RANDOM_STATE = 5 # set to None for random selection
 
 # column definitions

@@ -13,8 +13,7 @@ class ImportYelpReviewText:
                  col_restaurant_id = None,
                  col_review_id = None,
                  min_reviews = None,
-                 n_restaurants = None,
-                 random_state = None
+                 n_restaurants = None
                  ):
         """
         Defaults to all parameters as set in config.py; overrides parameters when stated in function call.
@@ -36,7 +35,6 @@ class ImportYelpReviewText:
             "col_review_id": config.COL_REVIEW_ID,
             "min_reviews": config.MIN_REVIEWS,
             "n_restaurants": config.N_RESTAURANTS,
-            "random_state": config.RANDOM_STATE
         }
 
         overrides = {
@@ -48,7 +46,6 @@ class ImportYelpReviewText:
             "col_review_id": col_review_id,
             "min_reviews": min_reviews,
             "n_restaurants": n_restaurants,
-            "random_state": random_state
         }
 
         for name, default in defaults.items():
@@ -92,8 +89,8 @@ class ImportYelpReviewText:
 
         reviews_sample.to_csv(os.path.join(self.sampled_data_path,"reviews_samples.csv"))
         return reviews_sample
-
-    def select_restaurants_for_rag(self,input_df):
+    
+    def select_restaurants_for_rag(self,input_df,random_state):
         """
         Filter the extracted Yelp data to restaurants only with a minimum number of distinct reviews.
         Then reduce that list to a preset number of restaurants; that preset number is set in config.py.
@@ -110,7 +107,7 @@ class ImportYelpReviewText:
 
         ids_array = input_df.groupby(self.col_restaurant_id)[self.col_review_id].nunique()
 
-        selected_ids = ids_array[ids_array > self.min_reviews].sample(self.n_restaurants,random_state = self.random_state).index.tolist()
+        selected_ids = ids_array[ids_array > self.min_reviews].sample(self.n_restaurants,random_state = random_state).index.tolist()
 
         output_df = input_df[input_df[self.col_restaurant_id].isin(selected_ids)]
 
@@ -118,7 +115,7 @@ class ImportYelpReviewText:
         return output_df
 
 
-    def generate_final_restaurant_list_for_rag(self):
+    def generate_final_restaurant_list_for_rag(self,random_state):
         """
         Execute the Yelp dataset extraction process end-to-end, starting with the entire Yelp dataset and ending with 
         a small quantity of restaurants with a minimum number of reviews to use in the RAG.
@@ -131,9 +128,9 @@ class ImportYelpReviewText:
         print(f"  Yelp dataset sample with shape {reviews_sample.shape} created.")
         print(f"  Yelp dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_samples.csv")}")
         print(f"  Sampling Yelp dataset for {self.n_restaurants} restaurants to use in this RAG demo.")
-
-        reviews_df = self.select_restaurants_for_rag(reviews_sample)
-
+        
+        reviews_df = self.select_restaurants_for_rag(reviews_sample,random_state)
+        
         print(f"  RAG dataset consisting of {self.n_restaurants} and with shape {reviews_df.shape} created.")
         print(f"  RAG dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_df.csv")}")
         return True

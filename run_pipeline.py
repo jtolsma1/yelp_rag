@@ -1,4 +1,6 @@
 import os
+from typing import Callable,Optional
+from src.directory_build import BuildDirectoryStructure
 from src.data_io import ImportYelpReviewText
 from src.cleaning import CleanChunkYelpReviews
 from src.embeddings import CreateReviewEmbeddings
@@ -6,16 +8,22 @@ from src.retrieval import RetrieveRelevantText
 from src.summarization import SummarizeRelevantReviewText
 from src import config
 
+StatusCB = Callable[[dict],None]
 class YelpRAGPipelineRunner:
 
     def __init__(self):
-        print("Start Yelp RAG Pipeline")
+        pass
 
-    def run_pipeline(self):
+    def run_pipeline(self,random_state,status_cb: Optional[StatusCB] = None,):
+
+        print("\nPreparing file directories.")
+        dir = BuildDirectoryStructure()
+        dir.run_build()
+        print("\nFile directories built.")
 
         print("\nData download and sampling pipeline started.\n")
         io = ImportYelpReviewText()
-        io.generate_final_restaurant_list_for_rag()
+        io.generate_final_restaurant_list_for_rag(random_state = random_state)
         print("\nData download and sampling pipeline complete.")
 
         print("\nCleaning and chunking pipeline started.\n")
@@ -37,8 +45,8 @@ class YelpRAGPipelineRunner:
         print("\nRelevant text retrieval pipeline complete.")
 
         print("\nLLM summarization pipeline started.\n")
-        su = SummarizeRelevantReviewText()
-        su.summarize_relevant_review_text()
+        sum = SummarizeRelevantReviewText()
+        sum.summarize_relevant_review_text(status_cb = status_cb)
         print("\nLLM summarization pipeline complete.")
 
         print("\nYelp RAG pipeline execution complete.")
