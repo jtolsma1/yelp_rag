@@ -95,8 +95,8 @@ class SummarizeRelevantReviewText:
         emit(status_cb,{"type":"start","total":total,"message":f"Summarizing reviews for {total} restaurants."})
         
         summary_dict = {}
-        for restaurant_no,id in enumerate(restaurant_ids):
-            restaurant_df = relevant_chunk_df[relevant_chunk_df["business_id"] == id]
+        for restaurant_no,rid in enumerate(restaurant_ids):
+            restaurant_df = relevant_chunk_df[relevant_chunk_df["business_id"] == rid]
             restaurant_name = restaurant_df.iloc[0]["restaurant_name"]
             restaurant_summary_dict = {}
             for topic in self.topics.keys():

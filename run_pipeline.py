@@ -45,8 +45,8 @@ class YelpRAGPipelineRunner:
         print("\nRelevant text retrieval pipeline complete.")
 
         print("\nLLM summarization pipeline started.\n")
-        sum = SummarizeRelevantReviewText()
-        sum.summarize_relevant_review_text(status_cb = status_cb)
+        su = SummarizeRelevantReviewText()
+        su.summarize_relevant_review_text(status_cb = status_cb)
         print("\nLLM summarization pipeline complete.")
 
         print("\nYelp RAG pipeline execution complete.")
