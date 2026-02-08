@@ -73,20 +73,29 @@ pip install -r requirements.txt
 ```
 ollama pull llama3.1:8b
 ```
+Please refer to https://ollama.com/search for the list of models available for download.<br><br>
 **3c**. In `src/config.py` in this repo, input the name of the downloaded Ollama model into the `OLLAMA_MODEL` parameter.<br>
 **3d (optional).** Configure other LLM parameters in `src/config.py`, such as the Ollama URL and temperature, if necessary.<br>
 **3e.** Run Ollama on local setup; expect to see this UI upon opening, although the UI is not needed to run the code in this repo:<br><br>
 <img src="images/ollama_ui.png" width=400 align="center"></img>
-
-**Note:** If Ollama is not running, the summarization step will fail and throw an HTTP Connection Error; 
-start or restart Ollama to resolve:<br><br>
-<img src="images/ollama_missing_error.png" width = 900 align="center"></img>
 
 #### 4. Run the Dashboard
 In the terminal, run:
 ```
 streamlit run app.py
 ```
+
+---
+
+### Troubleshooting Notes
+To execute end-to-end, the RAG pipeline needs both:
+- **a working internet connection, and**
+- **Ollama running in the background**
+
+If either condition is not met, the script will fail and throw an HTTP connection error:<br><br>
+<img src="images/ollama_missing_error.png" width = 900 align="center"></img>
+
+To resolve, ensure that the local environment is connected to the internet, then start or restart Ollama.
 
 ---
 
