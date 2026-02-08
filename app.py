@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 from run_pipeline import YelpRAGPipelineRunner
-import src.config as config
+from src import config
 
 
 # ------------------------------------
@@ -72,6 +72,7 @@ progress_bar = st.progress(0)
 # ------------------------------------
 
 def make_status_cb():
+    "Obtain message emissions from the summarization pipeline for serving in the streamlit app"
     def status_cb(event:dict):
         msg = event.get("message","")
         restaurant_no = event.get("restaurant_no")
@@ -79,10 +80,10 @@ def make_status_cb():
 
         if msg:
             status_box.info(msg)
-        
+
         if restaurant_no is not None and total:
             progress_bar.progress(int((restaurant_no / total)*100))
-    
+
     return status_cb
 
 
@@ -92,6 +93,13 @@ def make_status_cb():
 
 @st.cache_data
 def load_summaries(path: Path, mtime_ns: int) -> pd.DataFrame:
+    """
+    Load LLM-generated summaries from parquet file;
+    Clean up restaurant names and handle mising column errors.
+    @param path: file path to retrieve summaries parquet file
+    @param mtime_ns: nanosecond timestamp of data retrieval to avoid pulling from old caches
+    @return: cleaned summaries dataframe
+    """
     df = pd.read_parquet(path)
 
     # Basic safety: ensure expected columns exist
@@ -99,7 +107,7 @@ def load_summaries(path: Path, mtime_ns: int) -> pd.DataFrame:
     missing = expected - set(df.columns)
     if missing:
         raise ValueError(f"Missing columns in summaries file: {missing}")
-    
+
     # Clean up names for UX
     df["restaurant_name"] = df["restaurant_name"].astype("string").str.strip()
     df = df.dropna(subset=["restaurant_name"]).drop_duplicates("restaurant_name")
