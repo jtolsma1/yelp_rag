@@ -5,7 +5,13 @@ import streamlit as st
 from run_pipeline import YelpRAGPipelineRunner
 import src.config as config
 
+
+# ------------------------------------
+# Basic config
+# ------------------------------------
+
 DATA_PATH = os.path.join(config.DATA_DIR_PROC,"summaries.parquet")
+DATA_PATH = Path(DATA_PATH)
 
 st.set_page_config(page_title="Yelp Restaurant Review Summaries", layout="wide")
 st.title("Yelp Restaurant Review Summaries")
@@ -20,10 +26,15 @@ say about **food**, **service**, and **ambiance**.
 """
 )
 
-# --- Restaurant selector ---
 
+# ------------------------------------
+# Initialize input-output objects
+# ------------------------------------
+
+if "df" not in st.session_state:
+    st.session_state.df = None
 if "seed" not in st.session_state:
-    st.session_state.seed = 5
+    st.session_state.seed = 1
 if "randomize" not in st.session_state:
     st.session_state.randomize = False
 
@@ -32,7 +43,7 @@ col1, col2 = st.columns([2,1])
 with col1:
     seed_val = st.number_input(
         "Seed (integer)",
-        min_value = 0,
+        min_value = 1,
         step = 1,
         value = int(st.session_state.seed),
         disabled = st.session_state.randomize,
@@ -55,6 +66,11 @@ st.caption(f"Effective random state: `{random_state}`")
 status_box = st.empty()
 progress_bar = st.progress(0)
 
+
+# ------------------------------------
+# Enable messaging from inside the RAG
+# ------------------------------------
+
 def make_status_cb():
     def status_cb(event:dict):
         msg = event.get("message","")
@@ -69,61 +85,66 @@ def make_status_cb():
     
     return status_cb
 
-if st.button("Run pipeline (test status)"):
-    status_box.info("Starting pipeline...")
-    progress_bar.progress(0)
-    cb = make_status_cb()
-    
-    cb({"message": "Callback is wired ✅", "restaurant_no": 0, "total": 10})
 
-    runner = YelpRAGPipelineRunner()
-    runner.run_pipeline(random_state=random_state,status_cb=cb)
-
-    status_box.success("Pipeline finished.")
-    progress_bar.progress(100)
+# ------------------------------------
+# Create data caching function with error handling
+# ------------------------------------
 
 @st.cache_data
 def load_summaries(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
+
     # Basic safety: ensure expected columns exist
     expected = {"restaurant_name", "food", "service", "ambiance"}
     missing = expected - set(df.columns)
     if missing:
         raise ValueError(f"Missing columns in summaries file: {missing}")
+    
     # Clean up names for UX
     df["restaurant_name"] = df["restaurant_name"].astype("string").str.strip()
     df = df.dropna(subset=["restaurant_name"]).drop_duplicates("restaurant_name")
     df = df.sort_values("restaurant_name").reset_index(drop=True)
     return df
 
-try:
+
+# ------------------------------------
+# Introduce execution button
+# ------------------------------------
+
+if st.button("Run RAG Pipeline"):
+
+    progress_bar.progress(0)
+    cb = make_status_cb()
+
+    cb({"message": "Retrieving Yelp reviews...", "restaurant_no": 0, "total": 10})
+
+    runner = YelpRAGPipelineRunner()
+    runner.run_pipeline(random_state=random_state,status_cb=cb)
+
     df = load_summaries(DATA_PATH)
-except:
-    st.warning("Run the pipeline to generate summaries.")
+
+    st.session_state.df = df
 
 
-restaurant = st.selectbox(
-    "Restaurant",
-    df["restaurant_name"].tolist(),
-    index=0 if len(df) else None,
-)
+# ------------------------------------
+# Serve RAG summaries using topic tabs
+# ------------------------------------
 
-if df.empty:
-    st.warning("No restaurants found in the summaries file.")
-    st.stop()
+df = st.session_state.df
 
-row = df.loc[df["restaurant_name"] == restaurant].iloc[0]
+if df is None:
+    status_box.info("Click the button to generate review summaries.")
+else:
+    options = sorted(df["restaurant_name"].unique().tolist())
+    selected = st.selectbox("Select a restaurant to view review summaries",options)
+    filtered = df[df["restaurant_name"] == selected].iloc[0].copy()
 
-st.subheader(row["restaurant_name"])
+    tab_food,tab_service,tab_ambiance = st.tabs(["Food","Service","Ambiance"])
+    with tab_food:
+        st.markdown(filtered["food"] if pd.notna(filtered["food"]) else "No food summary available.")
 
-# --- Topic tabs ---
-tab_food, tab_service, tab_ambiance = st.tabs(["Food", "Service", "Ambiance"])
+    with tab_service:
+        st.markdown(filtered["service"] if pd.notna(filtered["service"]) else "No service summary available.")
 
-with tab_food:
-    st.markdown(row["food"] if pd.notna(row["food"]) else "No food summary available.")
-
-with tab_service:
-    st.markdown(row["service"] if pd.notna(row["service"]) else "No service summary available.")
-
-with tab_ambiance:
-    st.markdown(row["ambiance"] if pd.notna(row["ambiance"]) else "No ambiance summary available.")
+    with tab_ambiance:
+        st.markdown(filtered["ambiance"] if pd.notna(filtered["ambiance"]) else "No ambiance summary available.")
