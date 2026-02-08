@@ -1,8 +1,7 @@
-import pandas as pd
-import os
 import unicodedata
+import pandas as pd
 
-import src.config as config
+from src import config
 
 class CleanChunkYelpReviews:
 
@@ -95,7 +94,8 @@ class CleanChunkYelpReviews:
 
         col_text = self.col_text
         before = len(df)
-        # basic cleaning    
+
+        # basic cleaning
         df[col_text] = df[col_text].astype("string").str.strip()
         df = df.dropna(subset = [col_text])
 
@@ -111,12 +111,12 @@ class CleanChunkYelpReviews:
             "“":'"',
             "’": "'",
         }
-        
+
         for char,rep_str in invalid_chars.items():
             df[col_text] = df[col_text].str.replace(char,rep_str,regex = False)
 
         df[col_text] = df[col_text].str.replace(r"\s+", " ", regex=True).str.strip()
-        
+
         print(f"  {before - len(df)} reviews dropped in cleaning step.")
         return df
 
@@ -179,7 +179,7 @@ class CleanChunkYelpReviews:
             char_idx+=(self.chunk_chars - self.overlap_chars)
 
             return pd.DataFrame(chunk_dict,index = ["chunk"]).T.reset_index(names = ["chunk_index"])
-        
+
 
     def generate_chunk_df(self,df):
         """
@@ -201,7 +201,7 @@ class CleanChunkYelpReviews:
             chunk_df = pd.concat([chunk_df,new_row],axis = 0)
             chunk_df = chunk_df.reset_index(drop = True)
         return chunk_df
-    
+
 
     def clean_chunk_export(self):
         """

@@ -1,9 +1,9 @@
-import pandas as pd
 import os
 import faiss
-import src.config as config
+import pandas as pd
 from sentence_transformers import SentenceTransformer
-from pathlib import Path
+
+from src import config
 
 class RetrieveRelevantText:
 
@@ -71,7 +71,7 @@ class RetrieveRelevantText:
         @return: list of all filenames
         """
         return sorted(self.index_path.glob("*.faiss"))
-    
+
     def get_index_files_with_metadata(self):
         """
         From a given list of index filenames, return the restaurant id, index file path, and metadata file path associated with each filename
@@ -86,15 +86,15 @@ class RetrieveRelevantText:
 
             if not meta_path.exists():
                 raise KeyError(f"Missing metadata for restaurant id {business_id}")
-            
+
             index_pairs.append({
                 "business_id":business_id,
                 "index_file":faiss_path,
                 "metadata_file":meta_path
             })
-        
+
         return index_pairs
-    
+
     @staticmethod
     def load_embedding_model(model_name,device = "mps"):
         """
@@ -102,8 +102,8 @@ class RetrieveRelevantText:
         @return: transformer model from HuggingFace.
         """
         return SentenceTransformer(model_name_or_path = model_name, device = device)
-    
-    
+
+
     def encode_query_topics(self):
         """
         Create embeddings for all topic words relevant to the RAG.s
@@ -114,7 +114,7 @@ class RetrieveRelevantText:
         for topic,keywords in self.topics.items():
             query = model.encode([keywords],convert_to_numpy=True,normalize_embeddings=True)
             query_embed.update({topic:query})
-        
+
         return query_embed
 
 
@@ -181,7 +181,7 @@ class RetrieveRelevantText:
 
         print(f"  Relevant text dataframe created using FAISS vector search with shape {result_df.shape}.")
         if empties:
-            print(f"  The following business ids and topics returned empty results:")
+            print("  The following business ids and topics returned empty results:")
             for k,v in empties:
                 print(f"  business id = {k}, topic = {v}")
         else:

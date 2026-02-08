@@ -1,11 +1,11 @@
 import os
-from sentence_transformers import SentenceTransformer
 from typing import List
+from sentence_transformers import SentenceTransformer
 import pandas as pd
 import numpy as np
 import faiss
 
-import src.config as config
+from src import config
 
 class CreateReviewEmbeddings:
 
@@ -60,14 +60,14 @@ class CreateReviewEmbeddings:
             value = overrides[name] if overrides[name] is not None else default
             setattr(self,name,value)
 
-    
+
     def load_chunked_reviews_data(self):
         """
         Import the cleaned and chunked reviews.
         @return: reviews data passed through cleaning and chunking steps.
         """
         return pd.read_parquet(self.processed_data_path)
-    
+
     @staticmethod
     def load_embedding_model(model_name,device = "mps"):
         """
@@ -75,7 +75,7 @@ class CreateReviewEmbeddings:
         @return: transformer model from HuggingFace.
         """
         return SentenceTransformer(model_name_or_path = model_name, device = device)
-    
+
 
     @staticmethod
     def embed_texts(model:SentenceTransformer,
@@ -93,7 +93,7 @@ class CreateReviewEmbeddings:
         @param convert_to_numpy: whether to return vectors as a numpy array; standard parameter in the .encode function in SentenceTransformer class
         @return: embeddings of review text chunks created using the selected transformer model. 
         """
-    
+
         embeddings = model.encode(
             sentences = texts,
             batch_size = batch_size,
@@ -103,7 +103,7 @@ class CreateReviewEmbeddings:
         )
 
         return embeddings.astype(np.float32,copy = False)
-    
+
 
     @staticmethod
     def build_faiss_index(X,metric = "cosine"):
@@ -123,7 +123,7 @@ class CreateReviewEmbeddings:
             index = faiss.IndexFlatL2(d)
         else:
             raise ValueError("metric must be 'cosine' or 'l2'")
-        
+
         index.add(X)
 
         return index
@@ -139,7 +139,7 @@ class CreateReviewEmbeddings:
 
         chunks_df = self.load_chunked_reviews_data()
         texts = chunks_df["chunk"].tolist()
-        
+
         model = self.load_embedding_model(self.embedding_model_name,self.embed_device)
         print(f"  Loaded model '{self.embedding_model_name}' from HuggingFace.")
         print("  Starting embedding process:")
@@ -156,10 +156,10 @@ class CreateReviewEmbeddings:
 
             meta_r.reset_index(drop = True).to_parquet(os.path.join(self.index_path,f"{restaurant_id}_meta.parquet"),engine = self.parquet_engine,index = False)
 
-        faiss_created = list(self.index_path.glob("*.faiss"))  
-        print(f"  {len(faiss_created)} .faiss files created in the index directory.")  
+        faiss_created = list(self.index_path.glob("*.faiss"))
+        print(f"  {len(faiss_created)} .faiss files created in the index directory.")
 
-        meta_created = list(self.index_path.glob("*.parquet"))  
-        print(f"  {len(meta_created)} metadata files (.parquet) created in the index directory.")  
+        meta_created = list(self.index_path.glob("*.parquet"))
+        print(f"  {len(meta_created)} metadata files (.parquet) created in the index directory.")
 
         return True

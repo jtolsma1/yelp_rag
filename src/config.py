@@ -59,12 +59,6 @@ TOPICS = {
 OLLAMA_MODEL = "llama3.1:8b"
 OLLAMA_BASE_URL = "http://localhost:11434/api/generate"
 TEMPERATURE = 0.4
-MAX_OUTPUT_TOKENS = 600
-
-# caching & logging
-ENABLE_CACHE = True
-CACHE_VER = "v1"
-LOG_LEVEL = "INFO"
 
 # saving objects
 METADATA_COLS = {

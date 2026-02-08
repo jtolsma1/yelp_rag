@@ -7,7 +7,7 @@ from src.summarization import SummarizeRelevantReviewText
 from src import config
 
 class YelpRAGPipelineRunner:
-    
+
     def __init__(self):
         print("Start Yelp RAG Pipeline")
 
@@ -37,11 +37,8 @@ class YelpRAGPipelineRunner:
         print("\nRelevant text retrieval pipeline complete.")
 
         print("\nLLM summarization pipeline started.\n")
-        sum = SummarizeRelevantReviewText()
-        sum.summarize_relevant_review_text()
+        su = SummarizeRelevantReviewText()
+        su.summarize_relevant_review_text()
         print("\nLLM summarization pipeline complete.")
 
         print("\nYelp RAG pipeline execution complete.")
-
-
-    

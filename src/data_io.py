@@ -1,10 +1,8 @@
-import sys
 import os
-import pandas as pd
-import numpy as np
 import json
+import pandas as pd
 
-import src.config as config
+from src import config
 class ImportYelpReviewText:
 
     def __init__(self,
@@ -83,7 +81,7 @@ class ImportYelpReviewText:
         """
         reviews = self.import_sample_from_complete_dataset(os.path.join(self.raw_data_path,"yelp_academic_dataset_review.json"))
         businesses = self.import_sample_from_complete_dataset(os.path.join(self.raw_data_path,"yelp_academic_dataset_business.json"))
-        
+
         reviews_sample = pd.merge(
             pd.DataFrame(reviews),
             pd.DataFrame(businesses),
@@ -94,7 +92,7 @@ class ImportYelpReviewText:
 
         reviews_sample.to_csv(os.path.join(self.sampled_data_path,"reviews_samples.csv"))
         return reviews_sample
-    
+
     def select_restaurants_for_rag(self,input_df):
         """
         Filter the extracted Yelp data to restaurants only with a minimum number of distinct reviews.
@@ -104,9 +102,9 @@ class ImportYelpReviewText:
         """
 
         cond1 = input_df[self.col_business_category].str.lower().str.contains("restaurant")
-       
+
        # many hotels contain restaurants but are not the focus of this RAG
-        cond2 = ~input_df[self.col_business_category].str.lower().str.contains("hotel|cinema",regex = True) 
+        cond2 = ~input_df[self.col_business_category].str.lower().str.contains("hotel|cinema",regex = True)
 
         input_df = input_df[cond1 & cond2]
 
@@ -118,7 +116,7 @@ class ImportYelpReviewText:
 
         output_df.to_csv(os.path.join(self.sampled_data_path,"reviews_df.csv"))
         return output_df
-    
+
 
     def generate_final_restaurant_list_for_rag(self):
         """
@@ -127,15 +125,15 @@ class ImportYelpReviewText:
         @return: True if executed successfully
         """
         print("  Sampling Yelp datasets...")
-        
+
         reviews_sample = self.import_yelp_data_sample()
-        
+
         print(f"  Yelp dataset sample with shape {reviews_sample.shape} created.")
         print(f"  Yelp dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_samples.csv")}")
         print(f"  Sampling Yelp dataset for {self.n_restaurants} restaurants to use in this RAG demo.")
-        
+
         reviews_df = self.select_restaurants_for_rag(reviews_sample)
-        
+
         print(f"  RAG dataset consisting of {self.n_restaurants} and with shape {reviews_df.shape} created.")
         print(f"  RAG dataset sample stored at {os.path.join(self.sampled_data_path,"reviews_df.csv")}")
         return True

@@ -1,7 +1,8 @@
-import pandas as pd
 import os
+import pandas as pd
 import requests
-import src.config as config
+
+from src import config
 
 class SummarizeRelevantReviewText:
 
@@ -58,14 +59,14 @@ class SummarizeRelevantReviewText:
         restaurant_ids = relevant_chunk_df[self.col_restaurant_id].unique().tolist()
 
         return relevant_chunk_df,restaurant_ids
-    
+
 
     def call_ollama(self,prompt,model,temperature=0.2):
         """
         Pass a string-formatted prompt to Ollama and store the response as a JSON object
         @return: Ollama model response as JSON object
         """
-    
+
         url = self.ollama_base_url
         payload = {
             "model":model,
@@ -76,10 +77,10 @@ class SummarizeRelevantReviewText:
 
         resp = requests.post(url,json=payload,timeout=120)
         resp.raise_for_status()
-        
+
         data = resp.json()
         return data["response"].strip()
-    
+
     def retrieve_relevant_text_summaries_from_ollama(self,relevant_chunk_df,restaurant_ids):
         """
         Segregates review test chunks by restaurant and topic.
@@ -91,8 +92,8 @@ class SummarizeRelevantReviewText:
 
 
         summary_dict = {}
-        for id in restaurant_ids:
-            restaurant_df = relevant_chunk_df[relevant_chunk_df["business_id"] == id]
+        for rid in restaurant_ids:
+            restaurant_df = relevant_chunk_df[relevant_chunk_df["business_id"] == rid]
             restaurant_name = restaurant_df.iloc[0]["restaurant_name"]
             restaurant_summary_dict = {}
             for topic in self.topics.keys():
@@ -127,7 +128,7 @@ class SummarizeRelevantReviewText:
                     """
                     context+=verbatim
                     i+=1
-                
+
                 summary = self.call_ollama(prompt = context,
                                     model = self.ollama_model,
                                     temperature=self.temperature
