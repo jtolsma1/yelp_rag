@@ -91,7 +91,7 @@ def make_status_cb():
 # ------------------------------------
 
 @st.cache_data
-def load_summaries(path: Path) -> pd.DataFrame:
+def load_summaries(path: Path, mtime_ns: int) -> pd.DataFrame:
     df = pd.read_parquet(path)
 
     # Basic safety: ensure expected columns exist
@@ -121,7 +121,8 @@ if st.button("Run RAG Pipeline"):
     runner = YelpRAGPipelineRunner()
     runner.run_pipeline(random_state=random_state,status_cb=cb)
 
-    df = load_summaries(DATA_PATH)
+    mtime_ns = DATA_PATH.stat().st_mtime_ns
+    df = load_summaries(DATA_PATH,mtime_ns)
 
     st.session_state.df = df
 
