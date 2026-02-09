@@ -54,10 +54,21 @@ are rebuilt by the pipeline for each execution.
 
 #### 1. Clone the Repo
 ```
-https://github.com/jtolsma1/yelp_rag.git
+git clone https://github.com/jtolsma1/yelp_rag.git
 ```
 
-#### 2. Install requirements
+#### 2. Download Yelp Open Dataset
+**2a.** The JSON dataset is available to download at https://business.yelp.com/data/resources/open-dataset/
+(total file size is multiple GB)<br><br>
+**2b.** Unzip the downloaded file<br><br>
+**2c.** Within the cloned repo, create a folder called `data/raw`<br><br>
+**2d.** Place these JSON files in `data/raw`:<br>
+```
+yelp_academic_dataset_business.json
+yelp_academic_dataset_review.json
+```
+
+#### 3. Install requirements
 Create a new virtual environment if desired (not shown), then
 execute these commands in terminal to install dependencies:
 ```
@@ -66,20 +77,20 @@ cd /local/path/to/repo/yelp_rag/
 pip install -r requirements.txt
 ```
 
-#### 3. Run Ollama
+#### 4. Run Ollama
 
-**3a.** Install Ollama on local setup at https://ollama.com/download.<br>
-**3b.** In terminal, download an LLM to run locally (will likely require multiple GB of free disk space); for example:<br>
+**4a.** Install Ollama on local setup from https://ollama.com/download.<br><br>
+**4b.** In terminal, download an LLM to run locally (will likely require multiple GB of free disk space); for example:<br>
 ```
 ollama pull llama3.1:8b
 ```
 Please refer to https://ollama.com/search for the list of models available for download.<br><br>
-**3c**. In `src/config.py` in this repo, input the name of the downloaded Ollama model into the `OLLAMA_MODEL` parameter.<br>
-**3d (optional).** Configure other LLM parameters in `src/config.py`, such as the Ollama URL and temperature, if necessary.<br>
-**3e.** Run Ollama on local setup; expect to see this UI upon opening, although the UI is not needed to run the code in this repo:<br><br>
+**4c**. In `src/config.py` in this repo, input the name of the downloaded Ollama model into the `OLLAMA_MODEL` parameter.<br><br>
+**4d (optional).** Configure other LLM parameters in `src/config.py`, such as the Ollama URL and temperature, if necessary.<br><br>
+**4e.** Run Ollama on local setup; expect to see this UI upon opening, although the UI is not needed to run the code in this repo:<br><br>
 <img src="images/ollama_ui.png" width=400 align="center"></img>
 
-#### 4. Run the Dashboard
+#### 5. Run the Dashboard
 In the terminal, run:
 ```
 streamlit run app.py
@@ -99,6 +110,6 @@ To resolve, ensure that the local environment is connected to the internet, then
 
 ---
 
-### Why I Made This
+### Why I Made This Project
 * To teach myself vector search, LLM summarization, and Streamlit
 * To practice productionizing ML pipelines
