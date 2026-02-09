@@ -61,8 +61,8 @@ git clone https://github.com/jtolsma1/yelp_rag.git
 **2a.** The JSON dataset is available to download at https://business.yelp.com/data/resources/open-dataset/
 (total file size is multiple GB)<br><br>
 **2b.** Unzip the downloaded file<br><br>
-**2c.** Within the cloned repo, create a folder called `data/raw`<br><br>
-**2d.** Place these JSON files in `data/raw`:<br>
+**2c.** Within the cloned repo, create a folder called `data/raw/`<br><br>
+**2d.** Place these JSON files in `data/raw/`:<br>
 ```
 yelp_academic_dataset_business.json
 yelp_academic_dataset_review.json
